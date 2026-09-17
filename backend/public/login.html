@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login & Register | U-Mall</title>
+
+    <!-- ==========================================
+         ១. បណ្ណាល័យ និង ហ្វុងអក្សរ (Libraries & Fonts)
+         ========================================== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- ==========================================
+         ២. ប្រព័ន្ធការពារ និង Auto-Redirect (Auth Guard)
+         ជួសជុលបញ្ហា៖ បើក Tab ថ្មីមិនបាច់ Login ទៀតទេ
+         ========================================== -->
+    <script>
+      (function checkAlreadyLoggedIn() {
+        // ប្រើ sessionStorage ការពារមិនឱ្យឆ្លង Tab គ្នា
+        const token = sessionStorage.getItem("token");
+        const role = sessionStorage.getItem("role");
+
+        // បើមានគណនីជាអ្នកទិញ (Buyer) រួចហើយ បញ្ជូនទៅកាន់ទំព័រដើមដោយស្វ័យប្រវត្តិ
+        if (token && (!role || role === "buyer")) {
+          window.location.replace("index.html");
+        }
+      })();
+    </script>
+
+    <!-- ==========================================
+         ៣. រចនាប័ទ្ម (CSS Styling)
+         ========================================== -->
+    <style>
+      :root {
+        --primary: #1e3a8a;
+        --accent: #2563eb;
+        --accent-hover: #1d4ed8;
+        --white: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --glass: rgba(255, 255, 255, 0.95);
+        --glass-border: rgba(255, 255, 255, 0.6);
+        --shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Kantumruy Pro", "Outfit", sans-serif;
+      }
+
+      /* បង្ខំ Font ខ្មែរឲ្យចូល SweetAlert */
+      .swal2-popup,
+      .swal2-title,
+      .swal2-html-container,
+      .swal2-confirm {
+        font-family: "Kantumruy Pro", "Outfit", sans-serif !important;
+      }
+
+      body {
+        background:
+          linear-gradient(rgba(30, 58, 138, 0.7), rgba(15, 23, 42, 0.8)),
+          url("https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2070&auto=format&fit=crop");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 6%;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+      }
+      .logo img {
+        height: 45px;
+        object-fit: contain;
+        transition: 0.3s;
+      }
+      .logo img:hover {
+        transform: scale(1.05);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 30px;
+        list-style: none;
+      }
+      .nav-links a {
+        text-decoration: none;
+        color: var(--white);
+        font-size: 1.05rem;
+        font-weight: 500;
+        transition: 0.3s;
+      }
+      .nav-links a:hover {
+        color: #93c5fd;
+      }
+
+      .auth-wrapper {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+      }
+      .auth-card {
+        background: var(--glass);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 45px 40px;
+        width: 100%;
+        max-width: 480px;
+        box-shadow: var(--shadow);
+        color: var(--text-main);
+        animation: floatUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      @keyframes floatUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .auth-card h2 {
+        font-size: 2rem;
+        margin-bottom: 5px;
+        font-weight: 700;
+        text-align: center;
+        color: var(--primary);
+      }
+      .auth-card p {
+        color: var(--text-muted);
+        margin-bottom: 30px;
+        font-size: 0.95rem;
+        text-align: center;
+      }
+
+      .step-indicator {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 30px;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        background: #e2e8f0;
+        border-radius: 50%;
+        transition: all 0.4s ease;
+      }
+      .dot.active {
+        background: var(--accent);
+        width: 25px;
+        border-radius: 10px;
+      }
+
+      .form-step {
+        display: none;
+        animation: slideInRight 0.4s ease;
+      }
+      .form-step.active {
+        display: block;
+      }
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+        text-align: left;
+      }
+      .input-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-main);
+      }
+      .input-group input {
+        width: 100%;
+        padding: 14px 18px;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        color: var(--text-main);
+        font-size: 1rem;
+        outline: none;
+        transition: 0.3s;
+      }
+      .input-group input::placeholder {
+        color: #94a3b8;
+        font-weight: 400;
+      }
+      .input-group input:focus {
+        background: #ffffff;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+      }
+
+      .step-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 25px;
+      }
+      .btn {
+        flex: 1;
+        padding: 15px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, var(--accent), var(--primary));
+        color: var(--white);
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+      }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+      }
+      .btn-secondary {
+        background: #f1f5f9;
+        color: var(--text-main);
+        border: 1px solid #e2e8f0;
+      }
+      .btn-secondary:hover {
+        background: #e2e8f0;
+      }
+
+      .switch-text {
+        margin-top: 25px;
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        text-align: center;
+        padding-top: 20px;
+        border-top: 1px solid #f1f5f9;
+      }
+      .switch-text a {
+        color: var(--accent);
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      .switch-text a:hover {
+        color: var(--primary);
+        text-decoration: underline;
+      }
+
+      .loader-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+        backdrop-filter: blur(5px);
+      }
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgba(255, 255, 255, 0.1);
+        border-top: 5px solid var(--accent);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .hidden {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ផ្ទាំង Load (Loading Overlay) -->
+    <div class="loader-overlay" id="loader">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- របារខាងលើ (Navbar) -->
+    <nav class="navbar">
+      <a href="index.html" class="logo">
+        <img
+          id="site-logo"
+          src="https://via.placeholder.com/150x50/1e3a8a/ffffff?text=U-Mall"
+          alt="U-Mall Logo"
+        />
+      </a>
+      <ul class="nav-links">
+        <li>
+          <a href="index.html"><i class="fas fa-home"></i> ទំព័រដើម</a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="auth-wrapper">
+      <!-- ==========================================
+           ៤. ផ្ទាំងទម្រង់ LOGIN 
+           ========================================== -->
+      <div id="login-box" class="auth-card">
+        <h2>សូមស្វាគមន៍ត្រឡប់មកវិញ</h2>
+        <p>ចូលគណនី U-Mall របស់អ្នក</p>
+
+        <form id="login-form">
+          <div class="input-group">
+            <label>ឈ្មោះគណនី / លេខទូរស័ព្ទ / អ៊ីមែល</label>
+            <input
+              type="text"
+              id="login-user"
+              placeholder="បញ្ចូលឈ្មោះ លេខទូរស័ព្ទ ឬអ៊ីមែល"
+              required
+            />
+          </div>
+          <div class="input-group">
+            <label>លេខសម្ងាត់ (Password)</label>
+            <input
+              type="password"
+              id="login-pass"
+              placeholder="បញ្ចូលលេខសម្ងាត់របស់អ្នក"
+              required
+            />
+          </div>
+          <button
+            type="button"
+            class="btn btn-primary"
+            style="width: 100%; margin-top: 15px"
+            onclick="handleLogin()"
+          >
+            ចូលគណនី
+            <i class="fas fa-sign-in-alt ml-2" style="margin-left: 8px"></i>
+          </button>
+        </form>
+
+        <div class="switch-text">
+          មិនទាន់មានគណនីមែនទេ?
+          <a onclick="toggleForm('register')">ចុះឈ្មោះឥឡូវនេះ</a>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           ៥. ផ្ទាំងទម្រង់ចុះឈ្មោះ (REGISTER - Multi-Step)
+           ========================================== -->
+      <div id="register-box" class="auth-card hidden">
+        <h2>បង្កើតគណនីថ្មី</h2>
+        <p>ចូលរួមជាសមាជិក U-Mall ថ្ងៃនេះ!</p>
+
+        <div class="step-indicator" id="step-indicators">
+          <div class="dot active"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+
+        <form id="register-form">
+          <!-- ជំហានទី ១ (Step 1) -->
+          <div class="form-step active" id="step-1">
+            <div class="input-group">
+              <label
+                >ឈ្មោះគណនី (Username)
+                <span style="color: #ef4444">*</span></label
+              >
+              <input
+                type="text"
+                id="reg-user"
+                placeholder="ឧ. sokdara123"
+                required
+              />
+            </div>
+            <div class="input-group">
+              <label
+                >លេខសម្ងាត់ (Password)
+                <span style="color: #ef4444">*</span></label
+              >
+              <input
+                type="password"
+                id="reg-pass"
+                placeholder="យ៉ាងតិច ៦ ខ្ទង់"
+                required
+              />
+            </div>
+            <div class="input-group">
+              <label
+                >បញ្ជាក់លេខសម្ងាត់ <span style="color: #ef4444">*</span></label
+              >
+              <input
+                type="password"
+                id="reg-pass-confirm"
+                placeholder="វាយលេខសម្ងាត់ម្តងទៀត"
+                required
+              />
+            </div>
+            <div class="step-actions">
+              <button
+                type="button"
+                class="btn btn-primary"
+                onclick="nextStep(1)"
+              >
+                បន្ទាប់
+                <i class="fas fa-arrow-right" style="margin-left: 8px"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- ជំហានទី ២ (Step 2) -->
+          <div class="form-step" id="step-2">
+            <div class="input-group">
+              <label
+                >ឈ្មោះពេញ (Full Name)
+                <span style="color: #ef4444">*</span></label
+              >
+              <input
+                type="text"
+                id="reg-fullname"
+                placeholder="ឧ. សុខ ដារ៉ា"
+                required
+              />
+            </div>
+            <div class="input-group">
+              <label
+                >លេខទូរស័ព្ទ (Phone)
+                <span style="color: #ef4444">*</span></label
+              >
+              <input
+                type="tel"
+                id="reg-phone"
+                placeholder="ឧ. 012345678"
+                required
+              />
+            </div>
+            <div class="input-group">
+              <label
+                >អ៊ីមែល (Email)
+                <span
+                  style="color: #94a3b8; font-weight: 400; font-size: 0.85rem"
+                  >(ស្រេចចិត្ត)</span
+                ></label
+              >
+              <input
+                type="email"
+                id="reg-email"
+                placeholder="ឧ. sokdara@gmail.com"
+              />
+            </div>
+            <div class="step-actions">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="prevStep(2)"
+              >
+                <i class="fas fa-arrow-left" style="margin-right: 8px"></i>
+                ថយក្រោយ
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                onclick="nextStep(2)"
+              >
+                បន្ទាប់
+                <i class="fas fa-arrow-right" style="margin-left: 8px"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- ជំហានទី ៣ (Step 3) -->
+          <div class="form-step" id="step-3">
+            <div class="input-group">
+              <label
+                >អាសយដ្ឋានដឹកជញ្ជូន
+                <span
+                  style="color: #94a3b8; font-weight: 400; font-size: 0.85rem"
+                  >(ស្រេចចិត្ត)</span
+                ></label
+              >
+              <input
+                type="text"
+                id="reg-address"
+                placeholder="ឧ. ភ្នំពេញ, កម្ពុជា"
+              />
+            </div>
+            <div class="input-group">
+              <label
+                >Link រូបភាព Profile
+                <span
+                  style="color: #94a3b8; font-weight: 400; font-size: 0.85rem"
+                  >(ស្រេចចិត្ត)</span
+                ></label
+              >
+              <input
+                type="text"
+                id="reg-profile-img"
+                placeholder="https://..."
+              />
+            </div>
+            <div class="step-actions">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="prevStep(3)"
+              >
+                <i class="fas fa-arrow-left" style="margin-right: 8px"></i>
+                ថយក្រោយ
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                onclick="handleRegister()"
+              >
+                បញ្ចប់ <i class="fas fa-check" style="margin-left: 8px"></i>
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div class="switch-text">
+          មានគណនីរួចហើយ? <a onclick="toggleForm('login')">ចូលគណនីទីនេះ</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         ៦. កូដដំណើរការប្រព័ន្ធ (JavaScript Logic)
+         ========================================== -->
+    <script>
+      const API_URL = "/api/auth";
+      const loader = document.getElementById("loader");
+      let currentStep = 1;
+
+      // ៦.១ ទាញយក Logo ពី Database ពេល Load ផេក
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          const res = await fetch("/api/settings");
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.logoUrl)
+              document.getElementById("site-logo").src = data.logoUrl;
+          }
+        } catch (error) {
+          console.log("មិនទាន់មាន API ទាញ Logo ទេ:", error);
+        }
+      });
+
+      // ៦.២ មុខងារគ្រប់គ្រងផ្ទាំង (Toggle Form & Steps UI)
+      function toggleForm(formType) {
+        document
+          .getElementById("login-box")
+          .classList.toggle("hidden", formType === "register");
+        document
+          .getElementById("register-box")
+          .classList.toggle("hidden", formType === "login");
+        if (formType === "register") {
+          currentStep = 1;
+          updateStepUI();
+        }
+      }
+
+      function updateStepUI() {
+        document.querySelectorAll(".form-step").forEach((step, index) => {
+          step.classList.toggle("active", index + 1 === currentStep);
+        });
+        document.querySelectorAll(".dot").forEach((dot, index) => {
+          dot.classList.toggle("active", index + 1 === currentStep);
+          if (index + 1 < currentStep) dot.style.background = "var(--accent)";
+          else if (index + 1 > currentStep) dot.style.background = "#e2e8f0";
+        });
+        setTimeout(() => {
+          const activeStep = document.getElementById(`step-${currentStep}`);
+          const firstInput = activeStep.querySelector("input");
+          if (firstInput) firstInput.focus();
+        }, 100);
+      }
+
+      // ៦.៣ មុខងារពិនិត្យទិន្នន័យ (Validation)
+      function validateStep(stepNum) {
+        if (stepNum === 1) {
+          const user = document.getElementById("reg-user").value.trim();
+          const pass = document.getElementById("reg-pass").value;
+          const confirm = document.getElementById("reg-pass-confirm").value;
+          if (!user || !pass || !confirm)
+            return "សូមបំពេញចន្លោះដែលមានសញ្ញាផ្កាយ (*) ទាំងអស់!";
+          if (pass.length < 6) return "លេខសម្ងាត់ត្រូវមានយ៉ាងតិច ៦ ខ្ទង់!";
+          if (pass !== confirm) return "លេខសម្ងាត់មិនត្រូវគ្នាទេ!";
+        }
+        if (stepNum === 2) {
+          const fullname = document.getElementById("reg-fullname").value.trim();
+          const phone = document.getElementById("reg-phone").value.trim();
+          if (!fullname || !phone) return "សូមបំពេញ ឈ្មោះពេញ និង លេខទូរស័ព្ទ!";
+        }
+        return null;
+      }
+
+      function nextStep(stepNum) {
+        const errorMsg = validateStep(stepNum);
+        if (errorMsg)
+          return Swal.fire({
+            icon: "warning",
+            text: errorMsg,
+            confirmButtonColor: "#2563eb",
+          });
+        currentStep++;
+        updateStepUI();
+      }
+
+      function prevStep(stepNum) {
+        currentStep--;
+        updateStepUI();
+      }
+
+      // ៦.៤ ប្រព័ន្ធចុច Enter (Smart Enter Key)
+      document
+        .getElementById("register-form")
+        .addEventListener("keydown", function (e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            const activeStep = document.getElementById(`step-${currentStep}`);
+            const inputs = Array.from(activeStep.querySelectorAll("input"));
+            const currentIndex = inputs.indexOf(document.activeElement);
+            if (currentIndex > -1) {
+              if (currentIndex < inputs.length - 1)
+                inputs[currentIndex + 1].focus();
+              else {
+                if (currentStep < 3) nextStep(currentStep);
+                else handleRegister();
+              }
+            }
+          }
+        });
+
+      document
+        .getElementById("login-form")
+        .addEventListener("keydown", function (e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            if (document.activeElement.id === "login-user")
+              document.getElementById("login-pass").focus();
+            else if (document.activeElement.id === "login-pass") handleLogin();
+          }
+        });
+
+      // ៦.៥ មុខងារស្នើចុះឈ្មោះ (Register API)
+      async function handleRegister() {
+        const errorMsg = validateStep(3);
+        if (errorMsg)
+          return Swal.fire({
+            icon: "warning",
+            text: errorMsg,
+            confirmButtonColor: "#2563eb",
+          });
+
+        const payload = {
+          username: document.getElementById("reg-user").value.trim(),
+          password: document.getElementById("reg-pass").value,
+          fullName: document.getElementById("reg-fullname").value.trim(),
+          phone: document.getElementById("reg-phone").value.trim(),
+          email: document.getElementById("reg-email").value.trim(),
+          address: document.getElementById("reg-address").value.trim(),
+          profileImage: document.getElementById("reg-profile-img").value.trim(),
+          role: "buyer",
+        };
+
+        loader.style.display = "flex";
+        try {
+          const res = await fetch(`${API_URL}/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json();
+          loader.style.display = "none";
+
+          if (data.success) {
+            Swal.fire({
+              icon: "success",
+              title: "ជោគជ័យ!",
+              text: "បង្កើតគណនីបានរួចរាល់ សូម Log in",
+              confirmButtonColor: "#2563eb",
+            }).then(() => {
+              document.getElementById("register-form").reset();
+              toggleForm("login");
+            });
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "បរាជ័យ",
+              text: data.message || "មិនអាចបង្កើតគណនីបានទេ!",
+              confirmButtonColor: "#2563eb",
+            });
+          }
+        } catch (error) {
+          loader.style.display = "none";
+          Swal.fire({
+            icon: "error",
+            title: "កំហុស",
+            text: "មានបញ្ហាក្នុងការភ្ជាប់ទៅកាន់ Server!",
+            confirmButtonColor: "#2563eb",
+          });
+        }
+      }
+
+      // ៦.៦ មុខងារចូលគណនី (Login API)
+      async function handleLogin() {
+        const username = document.getElementById("login-user").value.trim();
+        const password = document.getElementById("login-pass").value;
+
+        if (!username || !password)
+          return Swal.fire({
+            icon: "warning",
+            text: "សូមបំពេញឈ្មោះ និងលេខសម្ងាត់!",
+            confirmButtonColor: "#2563eb",
+          });
+
+        loader.style.display = "flex";
+        try {
+          const res = await fetch(`${API_URL}/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
+          const data = await res.json();
+          loader.style.display = "none";
+
+          if (data.success) {
+            if (
+              data.role === "admin" ||
+              data.role === "super_admin" ||
+              data.role === "seller"
+            ) {
+              return Swal.fire({
+                icon: "error",
+                title: "ហាមឃាត់",
+                text: "អ្នកគ្រប់គ្រង និងអ្នកលក់ត្រូវចូលតាម Admin Portal!",
+                confirmButtonColor: "#2563eb",
+              });
+            }
+
+            // ⚠️ ជួសជុល៖ ប្រើ sessionStorage ការពារកុំឱ្យឆ្លង Tab គ្នា
+            sessionStorage.setItem("token", data.token);
+            sessionStorage.setItem("username", data.username || "");
+            sessionStorage.setItem("role", data.role || "buyer");
+
+            Swal.fire({
+              icon: "success",
+              title: "ចូលគណនីជោគជ័យ",
+              showConfirmButton: false,
+              timer: 1500,
+            }).then(() => {
+              window.location.href = "index.html";
+            });
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "បរាជ័យ",
+              text: data.message || "ឈ្មោះ ឬលេខសម្ងាត់មិនត្រឹមត្រូវ!",
+              confirmButtonColor: "#2563eb",
+            });
+          }
+        } catch (error) {
+          loader.style.display = "none";
+          Swal.fire({
+            icon: "error",
+            title: "កំហុស",
+            text: "មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ!",
+            confirmButtonColor: "#2563eb",
+          });
+        }
+      }
+    </script>
+  </body>
+</html>

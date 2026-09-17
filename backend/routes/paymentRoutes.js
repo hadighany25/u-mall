@@ -1,0 +1,24 @@
+const express = require("express");
+const router = express.Router();
+
+// នាំចូល Function ទាំងអស់ពី paymentController រួមទាំង processCardPayment ផង
+const {
+  createUPayQR,
+  handleWebhook,
+  checkOrderStatus,
+  processCardPayment,
+} = require("../controllers/paymentController");
+
+// ១. ផ្លូវសម្រាប់ Frontend ហៅមកសុំ QR Code (POST /api/payment/create-qr)
+router.post("/create-qr", createUPayQR);
+
+// ២. ផ្លូវសម្រាប់ U-Pay បាញ់សារមកប្រាប់ថាលុយចូល (POST /api/payment/webhook)
+router.post("/webhook", handleWebhook);
+
+// ៣. ផ្លូវសម្រាប់ Frontend ឆែកមើលថាលុយចូលឬនៅ (GET /api/payment/orders/status/:orderId)
+router.get("/orders/status/:orderId", checkOrderStatus);
+
+// ៤. ផ្លូវសម្រាប់បង់តាមកាត (POST /api/payment/process-card)
+router.post("/process-card", processCardPayment);
+
+module.exports = router;
