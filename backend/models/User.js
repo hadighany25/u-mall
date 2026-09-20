@@ -1,3 +1,4 @@
+// User.js
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
@@ -54,6 +55,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["male", "female", "other", ""],
       default: "",
+    },
+    // 🌟 បន្ថែមថ្មី៖ គ្រប់គ្រងការបិទគណនី (Ban/Active)
+    status: {
+      type: String,
+      enum: ["active", "banned", "suspended"],
+      default: "active",
     },
   },
   {

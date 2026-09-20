@@ -31,25 +31,36 @@
 
     <!-- ==========================================
          ២. ប្រព័ន្ធការពារសិទ្ធិចូលមើល (Auth Guard) 
-         (ជួសជុលបញ្ហាលោតចេញពេល Refresh ឬបើក Tab ថ្មី)
          ========================================== -->
     <script>
       (function enforceRoleAccess() {
-        const pToken = sessionStorage.getItem("portal_token");
-        const mToken = sessionStorage.getItem("token");
-        const token = pToken || mToken;
+        const urlParams = new URLSearchParams(window.location.search);
+        const adminToken = urlParams.get("token");
 
-        const pRole = sessionStorage.getItem("portal_role");
-        const mRole = sessionStorage.getItem("role");
-        const role = pRole || mRole;
+        if (adminToken) {
+          sessionStorage.setItem("token", adminToken);
+          sessionStorage.setItem("role", "admin");
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname +
+              "?adminView=true&viewStoreId=" +
+              urlParams.get("viewStoreId"),
+          );
+        }
 
-        // បើគ្មាន Token ឬគ្មានសិទ្ធិជា Seller / Admin ទេ ទើបបញ្ជូនទៅ Login
+        const token =
+          sessionStorage.getItem("portal_token") ||
+          sessionStorage.getItem("token");
+        const role =
+          sessionStorage.getItem("portal_role") ||
+          sessionStorage.getItem("role");
+
         if (
           !token ||
-          (role !== "admin" && role !== "super_admin" && role !== "seller")
+          (role !== "seller" && role !== "admin" && role !== "super_admin")
         ) {
-          // ចំណាំ៖ ដាច់ខាតមិនប្រើ sessionStorage.clear() ព្រោះវាធ្វើឱ្យបាត់បង់ទិន្នន័យពេលបើក Tab ថ្មី
-          window.location.replace("admin-login.html");
+          window.location.replace("login.html");
         }
       })();
     </script>
@@ -66,7 +77,6 @@
         background-color: #111827;
         color: #f9fafb;
       }
-      /* បិទ/បើក ផ្ទាំង Tab */
       .tab-content {
         display: none;
         animation: fadeIn 0.3s ease-in-out;
@@ -84,13 +94,11 @@
           transform: translateY(0);
         }
       }
-      /* កម្ពស់តារាង Kanban (Orders) */
       .kanban-col {
         min-height: 500px;
         max-height: 75vh;
         overflow-y: auto;
       }
-      /* រចនា Scrollbar អោយតូចស្អាត */
       ::-webkit-scrollbar {
         width: 6px;
         height: 6px;
@@ -115,14 +123,14 @@
       class="w-64 bg-gray-900 text-white flex flex-col transition-all duration-300 z-20"
     >
       <div
-        class="h-16 flex items-center justify-center border-b border-gray-800"
+        id="main-logo-container"
+        class="h-16 flex items-center justify-center border-b border-gray-800 px-4"
       >
         <h1 class="text-xl font-bold flex items-center">
           <i class="fas fa-store text-blue-400 mr-2"></i> U-Mall Seller
         </h1>
       </div>
 
-      <!-- បញ្ជី Menu (Navigation) -->
       <nav class="flex-1 overflow-y-auto py-4">
         <ul class="space-y-1">
           <li>
@@ -131,9 +139,8 @@
               onclick="switchTab('dashboard')"
               id="nav-dashboard"
               class="nav-btn block px-6 py-3 border-l-4 transition bg-gray-800 text-white border-blue-500"
+              ><i class="fas fa-chart-pie w-5"></i> ទិដ្ឋភាពទូទៅ</a
             >
-              <i class="fas fa-chart-pie w-5"></i> ទិដ្ឋភាពទូទៅ
-            </a>
           </li>
           <li>
             <a
@@ -141,9 +148,8 @@
               onclick="switchTab('orders')"
               id="nav-orders"
               class="nav-btn block px-6 py-3 border-l-4 border-transparent text-gray-400 hover:text-white hover:bg-gray-800 transition"
+              ><i class="fas fa-shopping-bag w-5"></i> គ្រប់គ្រងការលក់</a
             >
-              <i class="fas fa-shopping-bag w-5"></i> គ្រប់គ្រងការលក់
-            </a>
           </li>
           <li>
             <a
@@ -151,9 +157,8 @@
               onclick="switchTab('products')"
               id="nav-products"
               class="nav-btn block px-6 py-3 border-l-4 border-transparent text-gray-400 hover:text-white hover:bg-gray-800 transition"
+              ><i class="fas fa-box w-5"></i> ឃ្លាំងទំនិញ</a
             >
-              <i class="fas fa-box w-5"></i> ឃ្លាំងទំនិញ
-            </a>
           </li>
           <li>
             <a
@@ -161,9 +166,8 @@
               onclick="switchTab('payment')"
               id="nav-payment"
               class="nav-btn block px-6 py-3 border-l-4 border-transparent text-gray-400 hover:text-white hover:bg-gray-800 transition"
+              ><i class="fas fa-wallet w-5"></i> ហិរញ្ញវត្ថុ (Payment)</a
             >
-              <i class="fas fa-wallet w-5"></i> ហិរញ្ញវត្ថុ (Payment)
-            </a>
           </li>
           <li>
             <a
@@ -171,14 +175,12 @@
               onclick="switchTab('settings')"
               id="nav-settings"
               class="nav-btn block px-6 py-3 border-l-4 border-transparent text-gray-400 hover:text-white hover:bg-gray-800 transition"
+              ><i class="fas fa-cog w-5"></i> កំណត់ទម្រង់ហាង</a
             >
-              <i class="fas fa-cog w-5"></i> កំណត់ទម្រង់ហាង
-            </a>
           </li>
         </ul>
       </nav>
 
-      <!-- ប៊ូតុង ចាកចេញ -->
       <div class="p-4 border-t border-gray-800">
         <button
           onclick="logout()"
@@ -195,7 +197,6 @@
     <main
       class="flex-1 flex flex-col h-screen overflow-hidden dark:bg-gray-900"
     >
-      <!-- ៥.១ របារផ្នែកខាងលើ (Header / Topbar) -->
       <header
         class="h-16 bg-white dark:bg-gray-800 shadow-sm flex items-center justify-between px-6 z-10 border-b dark:border-gray-700"
       >
@@ -231,11 +232,9 @@
         </div>
       </header>
 
-      <!-- ៥.២ ផ្ទៃ Tab នីមួយៗ (Tabs Container) -->
       <div class="flex-1 overflow-y-auto p-6">
         <!-- 📌 TAB 1: ទិដ្ឋភាពទូទៅ (DASHBOARD) -->
         <div id="dashboard-tab" class="tab-content active">
-          <!-- ប្រអប់ទិន្នន័យសង្ខេប ជួរទី១ -->
           <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
             <div
               class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border-l-4 border-blue-500"
@@ -298,7 +297,6 @@
             </div>
           </div>
 
-          <!-- ប្រអប់ទិន្នន័យសង្ខេប ជួរទី២ -->
           <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
             <div
               class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border-l-4 border-purple-500"
@@ -322,8 +320,8 @@
               <div
                 class="text-lg font-bold text-yellow-500 flex items-center gap-1"
               >
-                <i class="fas fa-star text-sm"></i>
-                <span id="dash-rating">0.0 (0)</span>
+                <i class="fas fa-star text-sm"></i
+                ><span id="dash-rating">0.0 (0)</span>
               </div>
             </div>
             <div
@@ -367,7 +365,6 @@
             </div>
           </div>
 
-          <!-- តារាង Order ថ្មីៗ -->
           <div
             class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden"
           >
@@ -421,15 +418,14 @@
               >
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 flex-1">
-              <!-- Pending -->
               <div
                 class="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 flex flex-col kanban-col border-t-4 border-blue-400"
               >
                 <h3
                   class="font-bold mb-3 text-blue-700 dark:text-blue-400 flex justify-between"
                 >
-                  <span>🆕 ថ្មី (Pending)</span>
-                  <span
+                  <span>🆕 ថ្មី (Pending)</span
+                  ><span
                     id="count-pending"
                     class="bg-blue-200 text-blue-800 text-xs px-2 py-1 rounded-full"
                     >0</span
@@ -437,15 +433,14 @@
                 </h3>
                 <div id="board-pending" class="flex-1 space-y-3"></div>
               </div>
-              <!-- Processing -->
               <div
                 class="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 flex flex-col kanban-col border-t-4 border-yellow-400"
               >
                 <h3
                   class="font-bold mb-3 text-yellow-700 dark:text-yellow-400 flex justify-between"
                 >
-                  <span>📦 កំពុងខ្ចប់ (Processing)</span>
-                  <span
+                  <span>📦 កំពុងខ្ចប់ (Processing)</span
+                  ><span
                     id="count-processing"
                     class="bg-yellow-200 text-yellow-800 text-xs px-2 py-1 rounded-full"
                     >0</span
@@ -453,15 +448,14 @@
                 </h3>
                 <div id="board-processing" class="flex-1 space-y-3"></div>
               </div>
-              <!-- Shipped -->
               <div
                 class="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 flex flex-col kanban-col border-t-4 border-purple-400"
               >
                 <h3
                   class="font-bold mb-3 text-purple-700 dark:text-purple-400 flex justify-between"
                 >
-                  <span>🚚 កំពុងដឹក (Shipped)</span>
-                  <span
+                  <span>🚚 កំពុងដឹក (Shipped)</span
+                  ><span
                     id="count-shipped"
                     class="bg-purple-200 text-purple-800 text-xs px-2 py-1 rounded-full"
                     >0</span
@@ -469,15 +463,14 @@
                 </h3>
                 <div id="board-shipped" class="flex-1 space-y-3"></div>
               </div>
-              <!-- Completed / Cancelled -->
               <div
                 class="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 flex flex-col kanban-col border-t-4 border-green-400"
               >
                 <h3
                   class="font-bold mb-3 text-green-700 dark:text-green-400 flex justify-between"
                 >
-                  <span>✅ បញ្ចប់ (Done/Cancel)</span>
-                  <span
+                  <span>✅ បញ្ចប់ (Done/Cancel)</span
+                  ><span
                     id="count-completed"
                     class="bg-green-200 text-green-800 text-xs px-2 py-1 rounded-full"
                     >0</span
@@ -542,7 +535,6 @@
         <!-- 📌 TAB 4: ហិរញ្ញវត្ថុ (PAYMENT / WITHDRAWAL) -->
         <div id="payment-tab" class="tab-content">
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <!-- ផ្ទាំងទឹកប្រាក់ដែលអាចដកបាន -->
             <div
               class="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-xl shadow p-6 col-span-1 lg:col-span-2 flex flex-col justify-between"
             >
@@ -564,7 +556,6 @@
               </div>
             </div>
 
-            <!-- ផ្ទាំងព័ត៌មានធនាគារ -->
             <div
               class="bg-white dark:bg-gray-800 rounded-xl shadow p-6 border-t-4 border-green-500"
             >
@@ -598,7 +589,6 @@
             </div>
           </div>
 
-          <!-- តារាងប្រវត្តិដកប្រាក់ -->
           <div
             class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden"
           >
@@ -630,7 +620,6 @@
         <!-- 📌 TAB 5: កំណត់ទម្រង់ហាង (SETTINGS) -->
         <div id="settings-tab" class="tab-content">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- ទម្រង់ហាងទូទៅ -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
               <h3
                 class="text-lg font-bold mb-4 border-b dark:border-gray-700 pb-2 dark:text-white"
@@ -641,8 +630,7 @@
                 <div>
                   <label class="block text-sm font-bold mb-1 dark:text-gray-300"
                     >ឈ្មោះហាង *</label
-                  >
-                  <input
+                  ><input
                     type="text"
                     id="store-name"
                     required
@@ -652,8 +640,7 @@
                 <div>
                   <label class="block text-sm font-bold mb-1 dark:text-gray-300"
                     >រូបតំណាងហាង (Logo URL)</label
-                  >
-                  <input
+                  ><input
                     type="url"
                     id="store-logo"
                     class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 focus:border-blue-500"
@@ -662,8 +649,7 @@
                 <div>
                   <label class="block text-sm font-bold mb-1 dark:text-gray-300"
                     >រូបភាពគម្រប (Cover URL)</label
-                  >
-                  <input
+                  ><input
                     type="url"
                     id="store-cover"
                     class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 focus:border-blue-500"
@@ -672,8 +658,7 @@
                 <div>
                   <label class="block text-sm font-bold mb-1 dark:text-gray-300"
                     >សេចក្ដីពណ៌នា</label
-                  >
-                  <textarea
+                  ><textarea
                     id="store-desc"
                     rows="3"
                     class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 focus:border-blue-500"
@@ -682,7 +667,6 @@
               </form>
             </div>
 
-            <!-- ទម្រង់គណនីធនាគារ (U-PAY) -->
             <div class="space-y-6">
               <div
                 class="bg-blue-50 dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-blue-100 dark:border-gray-700"
@@ -698,11 +682,10 @@
                     <label
                       class="block text-sm font-bold mb-1 dark:text-gray-300"
                       >ធនាគារ (Bank Name)</label
-                    >
-                    <input
+                    ><input
                       type="text"
                       id="bank-name"
-                      value="U-PAY"
+                      value="U PAY BANK"
                       readonly
                       class="w-full bg-gray-100 border dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400 rounded-lg px-4 py-2 cursor-not-allowed font-bold"
                     />
@@ -719,8 +702,7 @@
                         placeholder="ឧទាហរណ៍៖ 100100100"
                         oninput="resetBankVerification()"
                         class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 focus:border-blue-500"
-                      />
-                      <button
+                      /><button
                         type="button"
                         onclick="verifyBankAccount()"
                         class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-bold transition flex items-center gap-2 whitespace-nowrap shadow"
@@ -737,8 +719,7 @@
                     <label
                       class="block text-sm font-bold mb-1 dark:text-gray-300"
                       >ឈ្មោះម្ចាស់គណនី (Account Name) *</label
-                    >
-                    <input
+                    ><input
                       type="text"
                       id="account-name"
                       readonly
@@ -763,8 +744,6 @@
     <!-- ==========================================
          ៦. ផ្ទាំងលោតពីលើ (MODALS)
          ========================================== -->
-
-    <!-- Modal សម្រាប់បញ្ជូលទំនិញថ្មី -->
     <div
       id="product-modal"
       class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50"
@@ -797,8 +776,7 @@
           <div>
             <label class="block text-sm font-bold mb-1 dark:text-gray-300"
               >ឈ្មោះទំនិញ *</label
-            >
-            <input
+            ><input
               type="text"
               id="prod-name"
               required
@@ -809,8 +787,7 @@
             <div>
               <label class="block text-sm font-bold mb-1 dark:text-gray-300"
                 >តម្លៃ ($) *</label
-              >
-              <input
+              ><input
                 type="number"
                 step="0.01"
                 id="prod-price"
@@ -821,8 +798,7 @@
             <div>
               <label class="block text-sm font-bold mb-1 dark:text-gray-300"
                 >ចំនួនស្តុក *</label
-              >
-              <input
+              ><input
                 type="number"
                 id="prod-stock"
                 required
@@ -833,8 +809,7 @@
           <div>
             <label class="block text-sm font-bold mb-1 dark:text-gray-300"
               >Category (ប្រភេទ) *</label
-            >
-            <select
+            ><select
               id="prod-category"
               required
               class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 focus:border-blue-500 bg-white dark:bg-gray-700"
@@ -843,8 +818,7 @@
           <div>
             <label class="block text-sm font-bold mb-1 dark:text-gray-300"
               >Link រូបភាព (URL)</label
-            >
-            <input
+            ><input
               type="url"
               id="prod-image"
               class="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 focus:border-blue-500"
@@ -856,9 +830,8 @@
               onclick="closeProductModal()"
               class="px-4 py-2 text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg font-bold"
             >
-              បោះបង់
-            </button>
-            <button
+              បោះបង់</button
+            ><button
               type="submit"
               class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold shadow"
             >
@@ -869,7 +842,6 @@
       </div>
     </div>
 
-    <!-- Modal សម្រាប់រៀបចំ Category -->
     <div
       id="category-modal"
       class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50"
@@ -897,8 +869,7 @@
               id="new-cat-name"
               placeholder="ឈ្មោះ Category ថ្មី..."
               class="flex-1 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 focus:border-blue-500"
-            />
-            <button
+            /><button
               onclick="addNewCategory()"
               class="bg-gray-800 dark:bg-gray-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-gray-900 shadow"
             >
@@ -921,17 +892,18 @@
          ៧. កូដដំណើរការប្រព័ន្ធ (MASTER JAVASCRIPT LOGIC)
          ========================================== -->
     <script>
-      // ------------------------------------------
-      // ៧.១ អថេរទូទៅ (Global Variables)
-      // ------------------------------------------
       const API_URL = "/api/seller";
       const PAYOUT_API = "/api/payout";
 
-      const token =
-        sessionStorage.getItem("portal_token") ||
-        sessionStorage.getItem("token");
-      const role =
-        sessionStorage.getItem("portal_role") || sessionStorage.getItem("role");
+      let token = "";
+      let role = "";
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const viewStoreId = urlParams.get("viewStoreId");
+
+      // 🌟 កំណត់ API endpoint ជា Dynamic Function (សំខាន់បំផុត!)
+      const getApiUrl = (base) =>
+        viewStoreId ? `${base}?storeId=${viewStoreId}` : base;
 
       let storeData = {
         categories: [],
@@ -943,11 +915,14 @@
       let orders = [];
       let withdrawalHistory = [];
 
-      // ------------------------------------------
-      // ៧.២ ចាប់ផ្ដើមដំណើរការ (Initialization)
-      // ------------------------------------------
       document.addEventListener("DOMContentLoaded", () => {
-        // ការពារទ្វេដង
+        token =
+          sessionStorage.getItem("portal_token") ||
+          sessionStorage.getItem("token");
+        role =
+          sessionStorage.getItem("portal_role") ||
+          sessionStorage.getItem("role");
+
         if (
           !token ||
           (role !== "seller" && role !== "admin" && role !== "super_admin")
@@ -958,40 +933,51 @@
 
         initTheme();
         initTabState();
-
-        // ទាញទិន្នន័យលើកដំបូង
+        fetchSettings();
         fetchProfile();
         fetchWithdrawals();
         fetchProducts();
-        fetchOrders();
+        fetchOrders(true);
 
-        // 🔄 ប្រព័ន្ធទាញទិន្នន័យដោយស្វ័យប្រវត្តិ (Auto-Refresh Polling)
-        // អាប់ដេតរៀងរាល់ ១០ វិនាទី ដើម្បីទទួលបានការកុម្ម៉ង់ ឬសំណើថ្មីៗដោយមិនបាច់ F5
         setInterval(() => {
           if (
             document.getElementById("payment-tab").classList.contains("active")
-          ) {
-            fetchWithdrawals(true);
-          }
+          )
+            fetchWithdrawals(false);
           if (
             document.getElementById("orders-tab").classList.contains("active")
-          ) {
-            fetchOrders(true);
-          }
+          )
+            fetchOrders(false);
           if (
             document
               .getElementById("dashboard-tab")
               .classList.contains("active")
           ) {
-            fetchOrders(true);
-            fetchWithdrawals(true);
+            fetchOrders(false);
+            fetchWithdrawals(false);
           }
         }, 10000);
       });
 
-      // ------------------------------------------
-      // ៧.៣ គ្រប់គ្រង Tab និង Theme (UI Controllers)
-      // ------------------------------------------
+      async function fetchSettings() {
+        try {
+          const res = await fetch("/api/settings");
+          const data = await res.json();
+          if (data.success && data.setting) {
+            const s = data.setting;
+            if (s.logoUrl && s.logoUrl.trim() !== "") {
+              document.getElementById("main-logo-container").innerHTML = `
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl">
+                  <img src="${s.logoUrl}" alt="U-Mall Logo" class="h-8 w-auto object-contain bg-white rounded p-1" />
+                  <span class="font-bold text-xl text-white tracking-tight">Seller</span>
+                </div>`;
+            }
+          }
+        } catch (error) {
+          console.error("Error setting:", error);
+        }
+      }
+
       function initTabState() {
         const savedTab =
           sessionStorage.getItem("activeSellerTab") || "dashboard";
@@ -1000,7 +986,6 @@
 
       function switchTab(tabId) {
         sessionStorage.setItem("activeSellerTab", tabId);
-
         document
           .querySelectorAll(".tab-content")
           .forEach((el) => el.classList.remove("active"));
@@ -1008,10 +993,8 @@
           el.classList.remove("bg-gray-800", "text-white", "border-blue-500");
           el.classList.add("border-transparent", "text-gray-400");
         });
-
         const activeTab = document.getElementById(`${tabId}-tab`);
         if (activeTab) activeTab.classList.add("active");
-
         const activeBtn = document.getElementById(`nav-${tabId}`);
         if (activeBtn) {
           activeBtn.classList.remove("border-transparent", "text-gray-400");
@@ -1021,7 +1004,6 @@
             "border-blue-500",
           );
         }
-
         const titles = {
           dashboard: "ទិដ្ឋភាពទូទៅ",
           orders: "គ្រប់គ្រងការលក់",
@@ -1029,7 +1011,6 @@
           payment: "ហិរញ្ញវត្ថុ",
           settings: "ការកំណត់ហាង",
         };
-
         const titleEl = document.getElementById("header-title");
         if (titleEl && titles[tabId]) titleEl.innerText = titles[tabId];
       }
@@ -1060,12 +1041,10 @@
         }
       }
 
-      // ------------------------------------------
-      // ៧.៤ ទាញយកទិន្នន័យពី Server (API Fetching)
-      // ------------------------------------------
       async function fetchProfile() {
         try {
-          const res = await fetch(`${API_URL}/profile`, {
+          // 🌟 កែប្រែ៖ ប្រើប្រាស់ getApiUrl ជំនួសអោយ URL ធម្មតា
+          const res = await fetch(getApiUrl(`${API_URL}/profile`), {
             headers: { Authorization: `Bearer ${token}` },
           });
           const data = await res.json();
@@ -1088,9 +1067,11 @@
 
       async function fetchWithdrawals(isPolling = false) {
         try {
-          const res = await fetch(`${PAYOUT_API}/seller/withdrawals`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          // 🌟 កែប្រែ៖ ប្រើប្រាស់ getApiUrl
+          const res = await fetch(
+            getApiUrl(`${PAYOUT_API}/seller/withdrawals`),
+            { headers: { Authorization: `Bearer ${token}` } },
+          );
           if (res.ok) {
             const data = await res.json();
             withdrawalHistory = data.data || [];
@@ -1104,7 +1085,8 @@
 
       async function fetchProducts() {
         try {
-          const res = await fetch(`${API_URL}/products`, {
+          // 🌟 កែប្រែ៖ ប្រើប្រាស់ getApiUrl
+          const res = await fetch(getApiUrl(`${API_URL}/products`), {
             headers: { Authorization: `Bearer ${token}` },
           });
           const data = await res.json();
@@ -1119,16 +1101,17 @@
         }
       }
 
-      async function fetchOrders(isPolling = false) {
+      async function fetchOrders(showLoader = true) {
         try {
-          const res = await fetch(`${API_URL}/orders`, {
+          // 🌟 កែប្រែ៖ ប្រើប្រាស់ getApiUrl
+          const res = await fetch(getApiUrl(`${API_URL}/orders`), {
             headers: { Authorization: `Bearer ${token}` },
           });
           const data = await res.json();
           if (data.success) {
-            orders = (data.orders || []).sort(
-              (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-            );
+            orders = (data.orders || [])
+              .filter((o) => o.status !== "unpaid")
+              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             renderDashboardOrders();
             renderKanbanBoard();
             calculateDashboardData();
@@ -1138,9 +1121,6 @@
         }
       }
 
-      // ------------------------------------------
-      // ៧.៥ បញ្ចូលទិន្នន័យទៅក្នុង HTML (Render UI)
-      // ------------------------------------------
       function renderProfileInfo() {
         document.getElementById("top-store-name").innerText =
           storeData.storeName || "មិនស្គាល់";
@@ -1159,13 +1139,14 @@
           storeData.description || "";
 
         const payInfo = storeData.paymentInfo || {};
-        document.getElementById("bank-name").value = payInfo.bankName || "";
+        document.getElementById("bank-name").value =
+          payInfo.bankName || "U PAY BANK";
         document.getElementById("account-name").value =
           payInfo.accountName || "";
         document.getElementById("account-number").value =
           payInfo.accountNumber || "";
         document.getElementById("lbl-bank").innerText =
-          payInfo.bankName || "មិនទាន់កំណត់";
+          payInfo.bankName || "U PAY BANK";
         document.getElementById("lbl-acc-name").innerText =
           payInfo.accountName || "មិនទាន់កំណត់";
         document.getElementById("lbl-acc-num").innerText =
@@ -1222,7 +1203,6 @@
         const searchElement = document.getElementById("dash-search-order");
         if (!searchElement) return;
         const searchTerm = searchElement.value.toLowerCase();
-
         const recentList = document.getElementById("recent-orders-list");
         recentList.innerHTML = "";
         const filtered = orders.filter((o) => {
@@ -1250,7 +1230,6 @@
 
           const oId = o.orderId || (o._id ? o._id.slice(-8) : "N/A");
           const dateStr = new Date(o.createdAt).toLocaleDateString("km-KH");
-
           recentList.innerHTML += `<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer" onclick="viewOrderDetails('${o._id}')"><td class="py-3 px-6 font-mono text-sm text-blue-600 dark:text-blue-400 font-bold">${oId}</td><td class="py-3 px-6 text-sm text-gray-500 dark:text-gray-400">${dateStr}</td><td class="py-3 px-6 font-medium text-sm max-w-[150px] truncate">${o.shippingAddress || "មិនបញ្ជាក់"}</td><td class="py-3 px-6 font-bold text-gray-800 dark:text-white">$${o.totalAmount.toFixed(2)}</td><td class="py-3 px-6">${statusBadge}</td></tr>`;
         });
       }
@@ -1259,7 +1238,6 @@
         const searchElement = document.getElementById("kanban-search");
         if (!searchElement) return;
         const searchTerm = searchElement.value.toLowerCase();
-
         const cols = {
           pending: [],
           processing: [],
@@ -1366,6 +1344,12 @@
                 minute: "2-digit",
               },
             );
+
+            // 🌟 បង្ហាញ Custom ID ក្នុង Seller View
+            const displayId = w.withdrawalId
+              ? w.withdrawalId
+              : "#" + String(w._id).substring(0, 8);
+
             let statusBadge = "";
             let actionHtml = w.note || "-";
             const st = (w.status || "").toUpperCase();
@@ -1387,7 +1371,16 @@
             else
               statusBadge = `<span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-bold">${w.status}</span>`;
 
-            return `<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"><td class="py-3 px-6 text-gray-600 dark:text-gray-300 text-xs">${dateStr}</td><td class="py-3 px-6 font-bold text-blue-600">$${w.amount.toFixed(2)}</td><td class="py-3 px-6 text-xs text-gray-600 dark:text-gray-400"><b>${w.bankName || w.bank || "U-PAY"}</b><br>${w.accountNumber}<br>${w.accountName}</td><td class="py-3 px-6">${statusBadge}</td><td class="py-3 px-6 text-sm text-gray-500 dark:text-gray-400">${actionHtml}</td></tr>`;
+            return `<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+               <td class="py-3 px-6 text-gray-600 dark:text-gray-300 text-xs">
+                  <span class="font-mono text-blue-600 dark:text-blue-400 font-bold block mb-1">${displayId}</span>
+                  ${dateStr}
+               </td>
+               <td class="py-3 px-6 font-bold text-blue-600">$${w.amount.toFixed(2)}</td>
+               <td class="py-3 px-6 text-xs text-gray-600 dark:text-gray-400"><b>${w.bankName || w.bank || "U-PAY"}</b><br>${w.accountNumber}<br>${w.accountName}</td>
+               <td class="py-3 px-6">${statusBadge}</td>
+               <td class="py-3 px-6 text-sm text-gray-500 dark:text-gray-400">${actionHtml}</td>
+            </tr>`;
           })
           .join("");
       }
@@ -1396,13 +1389,11 @@
         const searchElement = document.getElementById("search-product");
         if (!searchElement) return;
         const searchTerm = searchElement.value.toLowerCase();
-
         const tbody = document.getElementById("products-table-body");
         tbody.innerHTML = "";
         const filtered = products.filter((p) =>
           p.name.toLowerCase().includes(searchTerm),
         );
-
         filtered.forEach((p) => {
           const stockColor =
             p.stock < 5
@@ -1412,19 +1403,19 @@
         });
       }
 
-      // ------------------------------------------
-      // ៧.៦ មុខងារ Order Actions
-      // ------------------------------------------
       async function updateOrderStatus(orderId, newStatus) {
         try {
-          const res = await fetch(`${API_URL}/orders/${orderId}/status`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
+          const res = await fetch(
+            getApiUrl(`${API_URL}/orders/${orderId}/status`),
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ status: newStatus }),
             },
-            body: JSON.stringify({ status: newStatus }),
-          });
+          );
           const data = await res.json();
           if (data.success) {
             fetchOrders();
@@ -1451,19 +1442,24 @@
         });
         if (reason) {
           try {
-            const res = await fetch(`${API_URL}/orders/${orderId}/cancel`, {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
+            const res = await fetch(
+              getApiUrl(`${API_URL}/orders/${orderId}/cancel`),
+              {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ reason: reason }),
               },
-              body: JSON.stringify({ reason: reason }),
-            });
+            );
             const data = await res.json();
             if (data.success) {
               Swal.fire("ជោគជ័យ!", "Order ត្រូវបានបោះបង់។", "success");
               fetchOrders();
-            } else Swal.fire("បរាជ័យ", data.message, "error");
+            } else {
+              Swal.fire("បរាជ័យ", data.message, "error");
+            }
           } catch (err) {
             Swal.fire("Error", "បញ្ហាបច្ចេកទេស", "error");
           }
@@ -1478,7 +1474,7 @@
         let itemsHTML = (order.items || [])
           .map(
             (i) =>
-              `<li class="border-b py-2 border-gray-100 last:border-0 text-gray-700">${i.quantity}x ${i.name} <span class="float-right font-bold text-blue-600">$${i.price}</span></li>`,
+              `<li class="border-b py-2 border-gray-100 last:border-0 text-gray-700">${i.quantity || i.qty || 1}x ${i.name} <span class="float-right font-bold text-blue-600">$${i.price}</span></li>`,
           )
           .join("");
 
@@ -1498,9 +1494,37 @@
         });
       }
 
-      // ------------------------------------------
-      // ៧.៧ មុខងារ Products & Categories
-      // ------------------------------------------
+      async function saveCategoryToAPI() {
+        const payload = {
+          storeName: storeData.storeName,
+          logoUrl: storeData.logoUrl,
+          coverUrl: storeData.coverUrl,
+          description: storeData.description,
+          paymentInfo: storeData.paymentInfo,
+          categories: storeData.categories,
+        };
+        try {
+          const res = await fetch(getApiUrl(`${API_URL}/profile`), {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json();
+          if (data.success) {
+            storeData = data.store;
+            renderCategoryList();
+            updateCategoryDropdown();
+          } else {
+            Swal.fire("បរាជ័យ", data.message, "error");
+          }
+        } catch (err) {
+          Swal.fire("កំហុស", "មានបញ្ហាតភ្ជាប់ទៅ Server", "error");
+        }
+      }
+
       function openCategoryModal() {
         document.getElementById("category-modal").classList.remove("hidden");
         renderCategoryList();
@@ -1508,9 +1532,76 @@
       function closeCategoryModal() {
         document.getElementById("category-modal").classList.add("hidden");
       }
-      async function editCategory(oldName, index) {}
-      async function addNewCategory() {}
-      async function removeCategory(index) {}
+
+      async function editCategory(oldName, index) {
+        const { value: newName } = await Swal.fire({
+          title: "កែប្រែ Category",
+          input: "text",
+          inputValue: oldName,
+          showCancelButton: true,
+          confirmButtonText: "រក្សាទុក",
+          cancelButtonText: "បោះបង់",
+          inputValidator: (value) => {
+            if (!value.trim()) return "សូមបញ្ចូលឈ្មោះថ្មី!";
+            if (
+              value.trim() !== oldName &&
+              storeData.categories.includes(value.trim())
+            )
+              return "Category នេះមានរួចហើយ!";
+          },
+        });
+        if (newName && newName.trim() !== oldName) {
+          storeData.categories[index] = newName.trim();
+          Swal.fire({
+            title: "កំពុងកែប្រែ...",
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading(),
+          });
+          await saveCategoryToAPI();
+          Swal.close();
+        }
+      }
+
+      async function addNewCategory() {
+        const input = document.getElementById("new-cat-name");
+        const catName = input.value.trim();
+        if (!catName)
+          return Swal.fire("បញ្ជាក់", "សូមបញ្ចូលឈ្មោះ Category!", "warning");
+        if (storeData.categories.includes(catName))
+          return Swal.fire("បញ្ជាក់", "Category នេះមានរួចហើយ!", "warning");
+        storeData.categories.push(catName);
+        input.value = "";
+        Swal.fire({
+          title: "កំពុងបន្ថែម...",
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading(),
+        });
+        await saveCategoryToAPI();
+        Swal.close();
+      }
+
+      async function removeCategory(index) {
+        Swal.fire({
+          title: "លុប Category?",
+          text: "តើអ្នកពិតជាចង់លុប Category នេះមែនទេ?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#ef4444",
+          confirmButtonText: "លុបវា",
+          cancelButtonText: "បោះបង់",
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            storeData.categories.splice(index, 1);
+            Swal.fire({
+              title: "កំពុងលុប...",
+              allowOutsideClick: false,
+              didOpen: () => Swal.showLoading(),
+            });
+            await saveCategoryToAPI();
+            Swal.close();
+          }
+        });
+      }
 
       function updateCategoryDropdown() {
         const select = document.getElementById("prod-category");
@@ -1571,10 +1662,17 @@
           category: document.getElementById("prod-category").value,
           imageUrl: document.getElementById("prod-image").value,
         };
+
+        if (viewStoreId) {
+          payload.storeId = viewStoreId;
+        }
+
         const method = id ? "PUT" : "POST";
-        const url = id ? `${API_URL}/products/${id}` : `${API_URL}/products`;
+        const base = id ? `${API_URL}/products/${id}` : `${API_URL}/products`;
+
         try {
-          const res = await fetch(url, {
+          // 🌟 កែប្រែ៖ ប្រើប្រាស់ getApiUrl
+          const res = await fetch(getApiUrl(base), {
             method,
             headers: {
               "Content-Type": "application/json",
@@ -1605,7 +1703,8 @@
         }).then(async (result) => {
           if (result.isConfirmed) {
             try {
-              const res = await fetch(`${API_URL}/products/${id}`, {
+              // 🌟 កែប្រែ៖ ប្រើប្រាស់ getApiUrl
+              const res = await fetch(getApiUrl(`${API_URL}/products/${id}`), {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },
               });
@@ -1620,9 +1719,6 @@
         });
       }
 
-      // ------------------------------------------
-      // ៧.៨ មុខងារ Withdrawal & Settings (ហិរញ្ញវត្ថុ)
-      // ------------------------------------------
       async function requestWithdrawal() {
         if (
           !storeData.paymentInfo ||
@@ -1669,16 +1765,21 @@
               allowOutsideClick: false,
               didOpen: () => Swal.showLoading(),
             });
+
+            const payload = {
+              amount: parseFloat(formValues),
+              paymentInfo: storeData.paymentInfo,
+            };
+            if (viewStoreId) payload.storeId = viewStoreId;
+
+            // 🌟 មិនប្រើ getApiUrl ទេ ព្រោះ payload មាន storeId រួចហើយ
             const res = await fetch(`${PAYOUT_API}/seller/withdraw`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
               },
-              body: JSON.stringify({
-                amount: parseFloat(formValues),
-                paymentInfo: storeData.paymentInfo,
-              }),
+              body: JSON.stringify(payload),
             });
             const data = await res.json();
             Swal.close();
@@ -1753,7 +1854,6 @@
             "សូមចុចប៊ូតុង [Check] ដើម្បីផ្ទៀងផ្ទាត់លេខគណនី U-PAY ជាមុនសិន ទើបអាចរក្សាទុកបាន!",
             "warning",
           );
-
         const payload = {
           storeName: document.getElementById("store-name").value.trim(),
           logoUrl: document.getElementById("store-logo").value.trim(),
@@ -1766,13 +1866,15 @@
           },
           categories: storeData.categories,
         };
+
         try {
           Swal.fire({
             title: "កំពុងរក្សាទុក...",
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading(),
           });
-          const res = await fetch(`${API_URL}/profile`, {
+          // 🌟 កែប្រែ៖ ប្រើប្រាស់ getApiUrl
+          const res = await fetch(getApiUrl(`${API_URL}/profile`), {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -1797,9 +1899,6 @@
         }
       }
 
-      // ------------------------------------------
-      // ៧.៩ មុខងារចាកចេញពីប្រព័ន្ធ (Logout)
-      // ------------------------------------------
       function logout() {
         Swal.fire({
           title: "ចាកចេញពីប្រព័ន្ធ?",
@@ -1811,7 +1910,6 @@
           cancelButtonText: "បោះបង់",
         }).then((result) => {
           if (result.isConfirmed) {
-            // ដកចេញតែ Token ដែលពាក់ព័ន្ធ ដើម្បីកុំឱ្យប៉ះពាល់ដល់ Tab ផ្សេង ឬ Buyer
             sessionStorage.removeItem("portal_token");
             sessionStorage.removeItem("portal_role");
             sessionStorage.removeItem("token");

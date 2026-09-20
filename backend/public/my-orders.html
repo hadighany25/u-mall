@@ -3,303 +3,38 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MY Orders | U-Mall</title>
+    <title>My Orders | U-Mall</title>
 
-    <!-- 🌟 Google Font: Kantumruy Pro & Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-      :root {
-        --primary: #1e3a8a;
-        --accent: #2563eb;
-        --white: #ffffff;
-        --text-main: #1e293b;
-        --text-muted: #64748b;
-        --bg-gray: #f8fafc;
-        --border-color: #e2e8f0;
-      }
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Kantumruy Pro", "Outfit", sans-serif;
+      body {
+        font-family: "Outfit", sans-serif;
+        background-color: #f8fafc;
+        color: #1e293b;
       }
       .swal2-popup,
       .swal2-title,
       .swal2-html-container,
       .swal2-confirm {
-        font-family: "Kantumruy Pro", "Outfit", sans-serif !important;
-      }
-      body {
-        background-color: var(--bg-gray);
-        color: var(--text-main);
-        min-height: 100vh;
-      }
-
-      /* Navbar */
-      .navbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px 6%;
-        background: var(--white);
-        border-bottom: 1px solid var(--border-color);
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
-      }
-      .logo {
-        display: flex;
-        align-items: center;
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--primary);
-        text-decoration: none;
-        gap: 10px;
-      }
-      .nav-links {
-        display: flex;
-        gap: 20px;
-        list-style: none;
-      }
-      .nav-links a {
-        text-decoration: none;
-        color: var(--text-main);
-        font-weight: 500;
-        transition: 0.3s;
-      }
-      .nav-links a:hover {
-        color: var(--accent);
-      }
-
-      /* Main Container */
-      .container {
-        max-width: 900px;
-        margin: 30px auto;
-        padding: 0 20px;
-      }
-      .page-title {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: var(--primary);
-        margin-bottom: 20px;
-      }
-
-      /* Tabs (Filter) */
-      .tabs-container {
-        display: flex;
-        gap: 10px;
-        overflow-x: auto;
-        padding-bottom: 10px;
-        margin-bottom: 20px;
-        scrollbar-width: none;
+        font-family: "Outfit", sans-serif !important;
       }
       .tabs-container::-webkit-scrollbar {
         display: none;
       }
-      .tab {
-        padding: 10px 20px;
-        background: var(--white);
-        border: 1px solid var(--border-color);
-        border-radius: 25px;
-        font-size: 0.95rem;
-        font-weight: 500;
-        color: var(--text-muted);
-        cursor: pointer;
-        white-space: nowrap;
-        transition: 0.3s;
-      }
-      .tab:hover {
-        border-color: var(--accent);
-        color: var(--accent);
-      }
-      .tab.active {
-        background: var(--accent);
-        color: var(--white);
-        border-color: var(--accent);
-        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
-      }
-
-      /* Order Card */
-      .order-list {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-      .order-card {
-        background: var(--white);
-        border-radius: 16px;
-        padding: 20px;
-        border: 1px solid var(--border-color);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
-      }
-      .card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #f1f5f9;
-        padding-bottom: 12px;
-        margin-bottom: 15px;
-      }
-      .store-info {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: 600;
-        cursor: pointer;
-      }
-      .store-info:hover {
-        color: var(--accent);
-      }
-      .status-badge {
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
-      }
-
-      .status-pending {
-        background: #fef08a;
-        color: #854d0e;
-      }
-      .status-processing {
-        background: #dbeafe;
-        color: #1e40af;
-      }
-      .status-shipped {
-        background: #ffedd5;
-        color: #c2410c;
-      }
-      .status-completed {
-        background: #dcfce7;
-        color: #166534;
-      }
-      .status-cancelled {
-        background: #fee2e2;
-        color: #991b1b;
-      }
-
-      /* Order Items */
-      .order-item {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 15px;
-      }
-      .item-img {
-        width: 80px;
-        height: 80px;
-        border-radius: 10px;
-        object-fit: cover;
-        border: 1px solid var(--border-color);
-      }
-      .item-details {
-        flex: 1;
-      }
-      .item-title {
-        font-weight: 600;
-        font-size: 1.05rem;
-      }
-      .item-variant {
-        color: var(--text-muted);
-        font-size: 0.9rem;
-        margin-top: 5px;
-      }
-      .item-price {
-        font-weight: 600;
-        color: var(--accent);
-        text-align: right;
-      }
-
-      /* Card Footer */
-      .card-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-top: 1px solid #f1f5f9;
-        padding-top: 15px;
-        margin-top: 10px;
-      }
-      .total-price {
-        font-size: 1.1rem;
-        font-weight: 700;
-      }
-      .action-buttons {
-        display: flex;
-        gap: 10px;
-      }
-      .btn {
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.95rem;
-        cursor: pointer;
-        transition: 0.3s;
-        border: none;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .btn-primary {
-        background: var(--accent);
-        color: var(--white);
-        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
-      }
-      .btn-primary:hover {
-        background: #1d4ed8;
-        transform: translateY(-2px);
-      }
-      .btn-outline {
-        background: transparent;
-        color: var(--text-main);
-        border: 1px solid var(--border-color);
-      }
-      .btn-outline:hover {
-        background: var(--bg-gray);
-      }
-
-      /* Modal Review */
-      .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-        backdrop-filter: blur(4px);
-      }
-      .modal-box {
-        background: var(--white);
-        width: 100%;
-        max-width: 400px;
-        border-radius: 20px;
-        padding: 30px;
-        text-align: center;
-        animation: slideUp 0.3s ease;
-      }
-      @keyframes slideUp {
-        from {
-          transform: translateY(30px);
-          opacity: 0;
-        }
-        to {
-          transform: translateY(0);
-          opacity: 1;
-        }
+      .tabs-container {
+        scrollbar-width: none;
       }
       .star-rating {
         display: flex;
@@ -322,21 +57,6 @@
       .star-rating input:checked ~ label {
         color: #f59e0b;
       }
-      .review-textarea {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid var(--border-color);
-        border-radius: 10px;
-        resize: none;
-        font-size: 0.95rem;
-        margin-bottom: 20px;
-        outline: none;
-      }
-      .review-textarea:focus {
-        border-color: var(--accent);
-      }
-
-      /* Loader */
       .loader-overlay {
         position: fixed;
         top: 0;
@@ -352,8 +72,8 @@
       .spinner {
         width: 40px;
         height: 40px;
-        border: 4px solid var(--border-color);
-        border-top: 4px solid var(--accent);
+        border: 4px solid #e2e8f0;
+        border-top: 4px solid #2563eb;
         border-radius: 50%;
         animation: spin 1s linear infinite;
       }
@@ -362,59 +82,99 @@
           transform: rotate(360deg);
         }
       }
-      .empty-state {
-        text-align: center;
-        padding: 50px 20px;
-        color: var(--text-muted);
-      }
-      .empty-state i {
-        font-size: 4rem;
-        margin-bottom: 15px;
-        color: #cbd5e1;
-      }
     </style>
   </head>
-  <body>
+  <body class="antialiased flex flex-col min-h-screen">
     <div class="loader-overlay" id="loader"><div class="spinner"></div></div>
 
-    <nav class="navbar">
-      <a href="index.html" class="logo"
-        ><i class="fas fa-shopping-cart"></i> U-Mall</a
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+      <div
+        class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between"
       >
-      <ul class="nav-links">
-        <li>
-          <a href="index.html"><i class="fas fa-home"></i> ទំព័រដើម</a>
-        </li>
-      </ul>
-    </nav>
+        <!-- 🌟 កន្លែងបង្ហាញ Logo ពី Database -->
+        <a
+          href="index.html"
+          class="flex items-center space-x-3 flex-shrink-0 mr-2"
+          id="main-logo-container"
+        >
+          <!-- Logo លំនាំដើម នឹងត្រូវជំនួសដោយកូដ JS បើមាន Logo ក្នុង DB -->
+          <div
+            class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-1.5 rounded-xl shadow-sm hover:opacity-95 transition"
+          >
+            <span
+              class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center font-black text-xl"
+              >U</span
+            >
+            <span class="font-bold text-xl tracking-tight pr-1">Mall</span>
+          </div>
+        </a>
 
-    <div class="container">
-      <h2 class="page-title">ប្រវត្តិការទិញរបស់ខ្ញុំ</h2>
-      <div class="tabs-container">
-        <button class="tab active" onclick="filterOrders('all')">
-          ទាំងអស់
+        <a
+          href="index.html"
+          class="text-sm font-medium text-gray-600 hover:text-blue-600 transition"
+          ><i class="fas fa-home mr-1"></i> Home</a
+        >
+      </div>
+    </header>
+
+    <main class="flex-grow max-w-4xl mx-auto px-4 py-8 w-full">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">My Orders</h2>
+
+      <div class="tabs-container flex gap-3 overflow-x-auto pb-2 mb-6">
+        <button
+          class="tab-btn px-5 py-2 rounded-full border border-gray-200 bg-blue-600 text-white font-medium text-sm transition-all whitespace-nowrap"
+          onclick="filterOrders('all', this)"
+        >
+          All Orders
         </button>
-        <button class="tab" onclick="filterOrders('pending')">រង់ចាំ</button>
-        <button class="tab" onclick="filterOrders('processing')">
-          កំពុងរៀបចំ
+        <button
+          class="tab-btn px-5 py-2 rounded-full border border-gray-200 bg-white text-gray-600 hover:border-blue-600 hover:text-blue-600 font-medium text-sm transition-all whitespace-nowrap"
+          onclick="filterOrders('pending', this)"
+        >
+          Pending
         </button>
-        <button class="tab" onclick="filterOrders('shipped')">
-          កំពុងដឹកជញ្ជូន
+        <button
+          class="tab-btn px-5 py-2 rounded-full border border-gray-200 bg-white text-gray-600 hover:border-blue-600 hover:text-blue-600 font-medium text-sm transition-all whitespace-nowrap"
+          onclick="filterOrders('processing', this)"
+        >
+          Processing
         </button>
-        <button class="tab" onclick="filterOrders('completed')">បានទទួល</button>
-        <button class="tab" onclick="filterOrders('cancelled')">
-          បានលុបចោល
+        <button
+          class="tab-btn px-5 py-2 rounded-full border border-gray-200 bg-white text-gray-600 hover:border-blue-600 hover:text-blue-600 font-medium text-sm transition-all whitespace-nowrap"
+          onclick="filterOrders('shipped', this)"
+        >
+          Shipped
+        </button>
+        <button
+          class="tab-btn px-5 py-2 rounded-full border border-gray-200 bg-white text-gray-600 hover:border-blue-600 hover:text-blue-600 font-medium text-sm transition-all whitespace-nowrap"
+          onclick="filterOrders('completed', this)"
+        >
+          Completed
+        </button>
+        <button
+          class="tab-btn px-5 py-2 rounded-full border border-gray-200 bg-white text-gray-600 hover:border-blue-600 hover:text-blue-600 font-medium text-sm transition-all whitespace-nowrap"
+          onclick="filterOrders('cancelled', this)"
+        >
+          Cancelled
         </button>
       </div>
-      <div class="order-list" id="order-container"></div>
-    </div>
+
+      <div id="order-container" class="space-y-6"></div>
+    </main>
 
     <!-- Review Modal -->
-    <div class="modal-overlay" id="review-modal">
-      <div class="modal-box">
-        <h3 style="color: var(--primary); margin-bottom: 10px">វាយតម្លៃហាង</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem">
-          តើអ្នកពេញចិត្តនឹងផលិតផលនេះដែរឬទេ?
+    <div
+      id="review-modal"
+      class="fixed inset-0 bg-black/50 hidden justify-center items-center z-[1000] backdrop-blur-sm"
+    >
+      <div
+        class="bg-white w-full max-w-md rounded-2xl p-6 md:p-8 text-center m-4 shadow-xl transform transition-all"
+      >
+        <h3 class="text-xl font-bold text-blue-600 mb-2">
+          Rate Store & Product
+        </h3>
+        <p class="text-gray-500 text-sm">
+          Are you satisfied with this product?
         </p>
         <div class="star-rating">
           <input type="radio" id="star5" name="rating" value="5" /><label
@@ -439,25 +199,23 @@
           ></label>
         </div>
         <textarea
-          class="review-textarea"
           id="review-text"
           rows="3"
-          placeholder="ចែករំលែកមតិរបស់អ្នកនៅទីនេះ... (ស្រេចចិត្ត)"
+          class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm mb-6"
+          placeholder="Share your experience... (Optional)"
         ></textarea>
-        <div style="display: flex; gap: 10px">
+        <div class="flex gap-3">
           <button
-            class="btn btn-outline"
-            style="flex: 1; justify-content: center"
+            class="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-bold hover:bg-gray-50 transition"
             onclick="closeReviewModal()"
           >
-            បិទ
+            Cancel
           </button>
           <button
-            class="btn btn-primary"
-            style="flex: 1; justify-content: center"
+            class="flex-1 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-md transition"
             onclick="submitReview()"
           >
-            បញ្ជូនមតិ
+            Submit Review
           </button>
         </div>
       </div>
@@ -466,27 +224,47 @@
     <script>
       let currentOrderIdToReview = null;
       let allOrders = [];
+      let currentFilterStatus = "all"; // 🌟 ចងចាំ Tab ដែលយើងកំពុងមើល ពេល Auto-refresh វាមិនលោតបាត់
 
-      // ==========================================
-      // ១. មុខងារទាញយកប្រវត្តិទិញពី API (Update ថ្មីមានសុវត្ថិភាពជាងមុន)
-      // ==========================================
-      async function fetchOrders() {
+      // 🌟 មុខងារទាញយក Logo ពី Database
+      async function fetchSettings() {
+        try {
+          const res = await fetch("/api/settings");
+          const data = await res.json();
+          if (data.success && data.setting) {
+            const s = data.setting;
+            if (s.logoUrl && s.logoUrl.trim() !== "") {
+              const cleanLogoHtml = `
+                <div class="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-3 py-1.5 rounded-xl shadow-sm hover:scale-105 transition">
+                  <img src="${s.logoUrl}" alt="U-Mall Logo" class="h-10 md:h-12 w-auto object-contain" />
+                </div>`;
+              document.getElementById("main-logo-container").innerHTML =
+                cleanLogoHtml;
+            }
+          }
+        } catch (error) {
+          console.error("Error setting:", error);
+        }
+      }
+
+      // 🌟 មុខងារទាញយកប្រវត្តិបញ្ជាទិញ (បន្ថែមប៉ារ៉ាម៉ែត្រ showLoader ដើម្បីការពារការភ្លឹបភ្លែតពេល Auto-refresh)
+      async function fetchOrders(showLoader = true) {
         const loader = document.getElementById("loader");
-        loader.style.display = "flex";
+        if (showLoader) loader.style.display = "flex";
 
         try {
           const token = localStorage.getItem("token");
           if (!token) {
-            Swal.fire({
-              icon: "warning",
-              title: "សូមចូលគណនី",
-              text: "អ្នកមិនទាន់បានចូលគណនីទេ!",
-            });
-            loader.style.display = "none";
+            if (showLoader) {
+              Swal.fire({
+                icon: "warning",
+                title: "Login Required",
+                text: "Please log in first!",
+              });
+            }
             return;
           }
 
-          // Decode Token យក Buyer ID នៅទីនេះ
           let buyerId = null;
           try {
             const base64Url = token.split(".")[1];
@@ -502,19 +280,9 @@
             );
             buyerId = JSON.parse(jsonPayload).id;
           } catch (e) {
-            console.error("កំហុសអាន Token");
+            console.error("Token Error");
           }
 
-          if (!buyerId) {
-            loader.style.display = "none";
-            return Swal.fire({
-              icon: "error",
-              title: "បរាជ័យ",
-              text: "មិនអាចសម្គាល់គណនីបានទេ",
-            });
-          }
-
-          // បញ្ជូន ?buyerId=... ទៅឱ្យ Backend
           const response = await fetch(
             `/api/orders/my-orders?buyerId=${buyerId}`,
             {
@@ -528,161 +296,202 @@
 
           const result = await response.json();
           if (result.success) {
-            allOrders = result.data;
-            document
-              .querySelectorAll(".tab")
-              .forEach((t) => t.classList.remove("active"));
-            document.querySelector(".tab").classList.add("active");
-            renderOrders("all");
-          } else {
-            Swal.fire({ icon: "error", title: "បរាជ័យ", text: result.message });
+            allOrders = result.data.filter(
+              (order) => order.status !== "unpaid",
+            );
+            renderOrders(currentFilterStatus); // Render តែ Tab ដែលកំពុងបើក
           }
         } catch (error) {
-          Swal.fire({
-            icon: "error",
-            title: "បញ្ហាប្រព័ន្ធ",
-            text: "មិនអាចតភ្ជាប់ទៅ Server បានទេ",
-          });
+          console.log(error);
         } finally {
-          loader.style.display = "none";
+          if (showLoader) loader.style.display = "none";
         }
       }
-      // ==========================================
-      // ២. មុខងារផ្សេងៗ (Status, Buttons, Render)
-      // ==========================================
+
       const statusConfig = {
-        pending: { text: "រង់ចាំការបញ្ជាក់", class: "status-pending" },
-        processing: { text: "កំពុងរៀបចំ", class: "status-processing" },
-        shipped: { text: "កំពុងដឹកជញ្ជូន", class: "status-shipped" },
-        completed: { text: "ទទួលបានជោគជ័យ", class: "status-completed" },
-        cancelled: { text: "បានលុបចោល", class: "status-cancelled" },
+        pending: {
+          text: "Pending",
+          class: "bg-yellow-100 text-yellow-800 border border-yellow-200",
+        },
+        processing: {
+          text: "Processing",
+          class: "bg-blue-100 text-blue-800 border border-blue-200",
+        },
+        shipped: {
+          text: "Shipped",
+          class: "bg-orange-100 text-orange-800 border border-orange-200",
+        },
+        completed: {
+          text: "Completed",
+          class: "bg-green-100 text-green-800 border border-green-200",
+        },
+        cancelled: {
+          text: "Cancelled",
+          class: "bg-gray-200 text-gray-800 border border-gray-300",
+        },
       };
 
       function getActionButtons(order) {
         let btns = "";
+        const btnClassBase =
+          "px-4 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition shadow-sm ";
+        const btnOutline =
+          btnClassBase +
+          "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50";
+        const btnPrimary =
+          btnClassBase + "bg-blue-600 text-white hover:bg-blue-700";
+
         if (order.status === "pending" || order.status === "processing") {
-          btns += `<button class="btn btn-outline" onclick="contactSeller('${order.store?._id || ""}')"><i class="fas fa-comment-dots"></i> ទាក់ទងអ្នកលក់</button>`;
+          btns += `<button class="${btnOutline}" onclick="contactSeller('${order.store?._id || ""}')"><i class="fas fa-comment-dots"></i> Contact Seller</button>`;
         } else if (order.status === "shipped") {
-          btns += `<button class="btn btn-primary" onclick="confirmOrder('${order._id}')"><i class="fas fa-check-circle"></i> បញ្ជាក់ការទទួល</button>`;
+          btns += `<button class="${btnPrimary}" onclick="confirmOrder('${order._id}')"><i class="fas fa-check-circle"></i> Confirm Receipt</button>`;
         } else if (order.status === "completed") {
           if (!order.isReviewed) {
-            btns += `<button class="btn btn-primary" onclick="openReviewModal('${order._id}')"><i class="fas fa-star"></i> វាយតម្លៃហាង</button>`;
+            btns += `<button class="${btnPrimary}" onclick="openReviewModal('${order._id}')"><i class="fas fa-star"></i> Rate Store</button>`;
           }
-          btns += `<button class="btn btn-outline" onclick="reportOrder('${order._id}')"><i class="fas fa-exclamation-circle"></i> ប្តឹង/ប្តូរ</button>`;
+          btns += `<button class="${btnOutline}" onclick="reportOrder('${order._id}')"><i class="fas fa-undo"></i> Return / Refund</button>`;
         } else if (order.status === "cancelled") {
-          btns += `<button class="btn btn-outline"><i class="fas fa-redo"></i> ទិញម្តងទៀត</button>`;
+          btns += `<button class="${btnOutline}" onclick="buyAgain('${order._id}')"><i class="fas fa-redo"></i> Buy Again</button>`;
         }
         return btns;
       }
 
       function renderOrders(filter = "all") {
         const container = document.getElementById("order-container");
-        container.innerHTML = "";
         const filteredOrders =
           filter === "all"
             ? allOrders
             : allOrders.filter((o) => o.status === filter);
 
         if (filteredOrders.length === 0) {
-          container.innerHTML = `<div class="empty-state"><i class="fas fa-box-open"></i><h3>មិនមានប្រវត្តិទិញទេ</h3></div>`;
+          container.innerHTML = `
+            <div class="text-center py-20 text-gray-400">
+                <i class="fas fa-box-open text-6xl mb-4 text-gray-300"></i>
+                <h3 class="text-lg font-bold text-gray-600">No orders found</h3>
+            </div>`;
           return;
         }
 
-        let html = "";
+        const groupedOrders = {};
         filteredOrders.forEach((order) => {
-          const statusInfo = statusConfig[order.status] || {
-            text: order.status,
-            class: "status-pending",
-          };
-          const itemsHtml = order.items
-            .map(
-              (item) => `
-            <div class="order-item">
-                <img src="${item.image || "https://via.placeholder.com/80"}" class="item-img" alt="Product">
-                <div class="item-details">
-                    <div class="item-title">${item.name}</div>
-                    <div class="item-variant">${item.variant || ""} | ចំនួន: ${item.quantity}</div>
-                </div>
-                <div class="item-price">$${item.price.toFixed(2)}</div>
-            </div>
-        `,
-            )
-            .join("");
-
-          html += `
-        <div class="order-card">
-            <div class="card-header">
-                <div class="store-info"><i class="fas fa-store"></i> ${order.store?.storeName || "ហាងទូទៅ"}</div>
-                <div class="status-badge ${statusInfo.class}">${statusInfo.text}</div>
-            </div>
-            ${itemsHtml}
-            <div class="card-footer">
-                <div class="total-price">សរុប: <span style="color: var(--accent);">$${order.totalAmount.toFixed(2)}</span></div>
-                <div class="action-buttons">${getActionButtons(order)}</div>
-            </div>
-        </div>`;
+          const baseId = (order.orderId || order._id)
+            .split("-")
+            .slice(0, 2)
+            .join("-");
+          if (!groupedOrders[baseId]) {
+            groupedOrders[baseId] = {
+              baseId: baseId,
+              createdAt: order.createdAt,
+              subOrders: [],
+            };
+          }
+          groupedOrders[baseId].subOrders.push(order);
         });
+
+        let html = "";
+        Object.values(groupedOrders)
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .forEach((group) => {
+            let sessionTotalAmount = 0;
+            let subOrdersHtml = "";
+
+            group.subOrders.forEach((order) => {
+              sessionTotalAmount += order.totalAmount;
+              const statusInfo = statusConfig[order.status] || {
+                text: order.status,
+                class: "bg-gray-100 text-gray-800",
+              };
+
+              const itemsHtml = order.items
+                .map(
+                  (item) => `
+                    <div class="flex items-center gap-4 py-3">
+                        <img src="${item.image || "https://via.placeholder.com/80"}" class="w-16 h-16 rounded-lg object-cover border border-gray-100" alt="Product">
+                        <div class="flex-1">
+                            <div class="font-bold text-gray-800 text-sm md:text-base">${item.name}</div>
+                            <div class="text-xs text-gray-500 mt-1">${item.variant || ""} | Qty: ${item.quantity || item.qty}</div>
+                        </div>
+                        <div class="font-bold text-blue-600">$${(item.price * (item.quantity || item.qty || 1)).toFixed(2)}</div>
+                    </div>
+                `,
+                )
+                .join("");
+
+              subOrdersHtml += `
+                    <div class="bg-white rounded-xl p-4 md:p-5 mb-4 border border-gray-100 shadow-sm hover:shadow-md transition">
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-2">
+                            <div class="font-bold text-gray-800 flex items-center gap-2 cursor-pointer hover:text-blue-600">
+                                <i class="fas fa-store text-blue-500"></i> ${order.store?.storeName || "U-Mall Official"}
+                            </div>
+                            <div class="px-3 py-1 rounded-full text-xs font-bold ${statusInfo.class}">${statusInfo.text}</div>
+                        </div>
+                        <div class="divide-y divide-gray-50">${itemsHtml}</div>
+                        <div class="flex flex-col md:flex-row justify-between items-center pt-4 mt-2 border-t border-gray-50 gap-4">
+                            <div class="text-sm text-gray-500 font-medium">Order Subtotal: <span class="text-lg text-gray-800 font-bold ml-1">$${order.totalAmount.toFixed(2)}</span></div>
+                            <div class="flex w-full md:w-auto gap-2">${getActionButtons(order)}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const dateStr = new Date(group.createdAt).toLocaleString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+            html += `
+                <div class="bg-blue-50/50 rounded-2xl border border-blue-100 mb-8 overflow-hidden">
+                    <div class="bg-blue-100/50 px-5 py-3 flex flex-col sm:flex-row justify-between sm:items-center border-b border-blue-100 gap-2">
+                        <div class="flex items-center gap-3">
+                            <span class="font-bold text-blue-900 text-sm"><i class="fas fa-receipt mr-1"></i> Order ID: ${group.baseId}</span>
+                            <span class="text-xs text-blue-600 font-medium"><i class="far fa-clock"></i> ${dateStr}</span>
+                        </div>
+                        <div class="text-sm font-bold text-blue-900">Total Payment: <span class="text-lg ml-1">$${sessionTotalAmount.toFixed(2)}</span></div>
+                    </div>
+                    <div class="p-4 md:p-6 bg-transparent">${subOrdersHtml}</div>
+                </div>
+            `;
+          });
         container.innerHTML = html;
       }
 
-      function filterOrders(status) {
-        document
-          .querySelectorAll(".tab")
-          .forEach((t) => t.classList.remove("active"));
-        event.currentTarget.classList.add("active");
+      function filterOrders(status, btnElement) {
+        currentFilterStatus = status; // 🌟 ចងចាំ Tab ពេលចុច
+        document.querySelectorAll(".tab-btn").forEach((t) => {
+          t.classList.remove("bg-blue-600", "text-white");
+          t.classList.add("bg-white", "text-gray-600");
+        });
+        btnElement.classList.remove("bg-white", "text-gray-600");
+        btnElement.classList.add("bg-blue-600", "text-white");
         renderOrders(status);
       }
 
-      function confirmOrder(orderId) {
+      function contactSeller(storeId) {
         Swal.fire({
-          title: "បញ្ជាក់ការទទួល?",
-          text: "តើអ្នកពិតជាទទួលបានអីវ៉ាន់នេះហើយមែនទេ?",
-          icon: "question",
-          showCancelButton: true,
+          icon: "info",
+          title: "Coming Soon",
+          text: "Chat functionality will be available shortly!",
           confirmButtonColor: "#2563eb",
-          cancelButtonColor: "#e2e8f0",
-          confirmButtonText: "ទទួលបានហើយ",
-          cancelButtonText: '<span style="color:#1e293b">ត្រឡប់វិញ</span>',
-        }).then(async (result) => {
-          if (result.isConfirmed) {
-            document.getElementById("loader").style.display = "flex";
-            try {
-              const response = await fetch(`/api/orders/${orderId}/confirm`, {
-                method: "PUT",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-              });
-              const data = await response.json();
-              if (data.success) {
-                Swal.fire({
-                  icon: "success",
-                  title: "អរគុណ!",
-                  text: "ប្រព័ន្ធបានកត់ត្រាទុក",
-                  confirmButtonColor: "#2563eb",
-                });
-                fetchOrders();
-              } else {
-                Swal.fire({
-                  icon: "error",
-                  title: "បរាជ័យ",
-                  text: data.message,
-                });
-              }
-            } catch (error) {
-              Swal.fire({
-                icon: "error",
-                title: "បញ្ហាប្រព័ន្ធ",
-                text: "មិនអាចភ្ជាប់ទៅ Server បានទេ",
-              });
-            } finally {
-              document.getElementById("loader").style.display = "none";
-            }
-          }
         });
       }
-
+      function reportOrder(orderId) {
+        Swal.fire({
+          icon: "info",
+          title: "Customer Support",
+          text: "Please contact Admin at (012) 345-678 for returns.",
+          confirmButtonColor: "#2563eb",
+        });
+      }
+      function buyAgain(orderId) {
+        Swal.fire({
+          icon: "info",
+          title: "Coming Soon",
+          text: "Items will be added to your cart instantly.",
+          confirmButtonColor: "#2563eb",
+        });
+      }
       function openReviewModal(orderId) {
         currentOrderIdToReview = orderId;
         document
@@ -691,7 +500,6 @@
         document.getElementById("review-text").value = "";
         document.getElementById("review-modal").style.display = "flex";
       }
-
       function closeReviewModal() {
         document.getElementById("review-modal").style.display = "none";
         currentOrderIdToReview = null;
@@ -701,12 +509,13 @@
         const ratingEle = document.querySelector(
           'input[name="rating"]:checked',
         );
-        if (!ratingEle)
+        if (!ratingEle) {
           return Swal.fire({
             icon: "warning",
-            text: "សូមជ្រើសរើសចំនួនផ្កាយសិន!",
+            text: "Please select a star rating first!",
             confirmButtonColor: "#2563eb",
           });
+        }
 
         document.getElementById("review-modal").style.display = "none";
         document.getElementById("loader").style.display = "flex";
@@ -730,43 +539,85 @@
           if (data.success) {
             Swal.fire({
               icon: "success",
-              title: "ជោគជ័យ!",
-              text: "អរគុណសម្រាប់ការវាយតម្លៃ",
+              title: "Success!",
+              text: "Thank you for your feedback.",
               confirmButtonColor: "#2563eb",
             });
-            fetchOrders();
+            fetchOrders(false);
           } else {
-            Swal.fire({ icon: "error", title: "បរាជ័យ", text: data.message });
+            Swal.fire({ icon: "error", title: "Failed", text: data.message });
           }
         } catch (error) {
           Swal.fire({
             icon: "error",
-            title: "បញ្ហាប្រព័ន្ធ",
-            text: "មិនអាចភ្ជាប់ទៅ Server បានទេ",
+            title: "System Error",
+            text: "Cannot connect to server.",
           });
         } finally {
           document.getElementById("loader").style.display = "none";
         }
       }
 
-      function contactSeller(storeId) {
+      function confirmOrder(orderId) {
         Swal.fire({
-          icon: "info",
-          title: "កំពុងអភិវឌ្ឍ",
-          text: "មុខងារឆាតនឹងមកដល់ឆាប់ៗនេះ!",
+          title: "Confirm Receipt?",
+          text: "Have you received this order in good condition?",
+          icon: "question",
+          showCancelButton: true,
           confirmButtonColor: "#2563eb",
-        });
-      }
-      function reportOrder(orderId) {
-        Swal.fire({
-          icon: "info",
-          title: "ផ្នែកសេវាកម្ម",
-          text: "សូមទាក់ទងមកកាន់ Admin (012 345 678)",
-          confirmButtonColor: "#2563eb",
+          cancelButtonColor: "#e2e8f0",
+          confirmButtonText: "Yes, I got it",
+          cancelButtonText: '<span style="color:#1e293b">Cancel</span>',
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            document.getElementById("loader").style.display = "flex";
+            try {
+              const response = await fetch(`/api/orders/${orderId}/confirm`, {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              });
+              const data = await response.json();
+              if (data.success) {
+                Swal.fire({
+                  icon: "success",
+                  title: "Thank You!",
+                  text: "Order marked as completed.",
+                  confirmButtonColor: "#2563eb",
+                });
+                fetchOrders(false);
+              } else {
+                Swal.fire({
+                  icon: "error",
+                  title: "Failed",
+                  text: data.message,
+                });
+              }
+            } catch (error) {
+              Swal.fire({
+                icon: "error",
+                title: "System Error",
+                text: "Cannot connect to server.",
+              });
+            } finally {
+              document.getElementById("loader").style.display = "none";
+            }
+          }
         });
       }
 
-      window.onload = () => fetchOrders();
+      // 🌟 រត់ពេលចូលទំព័រដំបូង
+      window.onload = () => {
+        fetchSettings(); // ទាញ Logo
+        fetchOrders(true); // ទាញ Order (មានលោត Loading)
+
+        // 🌟 រត់ Auto Refresh រៀងរាល់ ១០ វិនាទី (អត់លោត Loading រំខានភ្នែកទេ)
+        setInterval(() => {
+          fetchOrders(false);
+        }, 10000); // 10000 ms = 10 វិនាទី
+      };
     </script>
   </body>
 </html>

@@ -22,15 +22,14 @@
 
     <!-- ==========================================
          ២. ប្រព័ន្ធការពារ និង Auto-Redirect (Auth Guard)
-         ជួសជុលបញ្ហា៖ បើក Tab ថ្មីមិនបាច់ Login ទៀតទេ
          ========================================== -->
     <script>
       (function checkAlreadyLoggedIn() {
-        // ប្រើ sessionStorage ការពារមិនឱ្យឆ្លង Tab គ្នា
-        const token = sessionStorage.getItem("token");
-        const role = sessionStorage.getItem("role");
+        // ⚠️ ជួសជុល៖ សម្រាប់អ្នកទិញ (Buyer) ត្រូវប្រើ localStorage ដើម្បីឱ្យគាត់បើកមើលទំនិញបានច្រើន Tab ដោយមិនបាច់ Login ម្ដងទៀត
+        const token = localStorage.getItem("token");
+        const role = localStorage.getItem("role");
 
-        // បើមានគណនីជាអ្នកទិញ (Buyer) រួចហើយ បញ្ជូនទៅកាន់ទំព័រដើមដោយស្វ័យប្រវត្តិ
+        // បើមានគណនីជាអ្នកទិញរួចហើយ បញ្ជូនទៅកាន់ទំព័រដើមដោយស្វ័យប្រវត្តិ
         if (token && (!role || role === "buyer")) {
           window.location.replace("index.html");
         }
@@ -773,6 +772,7 @@
           loader.style.display = "none";
 
           if (data.success) {
+            // ការពារអ្នកលក់ ឬ Admin មិនឱ្យចូលតាមច្រកនេះ
             if (
               data.role === "admin" ||
               data.role === "super_admin" ||
@@ -786,10 +786,10 @@
               });
             }
 
-            // ⚠️ ជួសជុល៖ ប្រើ sessionStorage ការពារកុំឱ្យឆ្លង Tab គ្នា
-            sessionStorage.setItem("token", data.token);
-            sessionStorage.setItem("username", data.username || "");
-            sessionStorage.setItem("role", data.role || "buyer");
+            // ⚠️ ជួសជុល៖ សម្រាប់អ្នកទិញ ត្រូវរក្សាទុកក្នុង localStorage
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("username", data.username || "");
+            localStorage.setItem("role", data.role || "buyer");
 
             Swal.fire({
               icon: "success",

@@ -1,3 +1,4 @@
+//Store.js
 const mongoose = require("mongoose");
 
 const storeSchema = new mongoose.Schema(
@@ -42,17 +43,17 @@ const storeSchema = new mongoose.Schema(
     // ==========================================
     averageRating: {
       type: Number,
-      default: 0, // ចំនួនផ្កាយជាមធ្យម (ឧ. 4.5 ផ្កាយ)
+      default: 5, // 👈 ដូរមក 5 ដើម្បីឱ្យហាងបង្កើតថ្មីមានផ្កាយ 5 ពេញភ្លាមៗ
       min: 0,
       max: 5,
     },
     totalRatings: {
       type: Number,
-      default: 0, // ចំនួនអ្នកដែលបានចុចវាយតម្លៃសរុប (ឧ. 150 នាក់)
+      default: 0,
     },
     totalSales: {
       type: Number,
-      default: 0, // ចំនួនដងដែលហាងលក់អីវ៉ាន់បានជោគជ័យ (Completed Orders)
+      default: 0,
     },
     // ==========================================
 

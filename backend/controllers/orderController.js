@@ -1,3 +1,4 @@
+// orderController.js
 const mongoose = require("mongoose");
 const Order = require("../models/Order");
 const Store = require("../models/Store");
@@ -16,6 +17,7 @@ const createOrder = async (req, res) => {
       store,
       shippingAddress,
       phone,
+      status, // 👈 ចាប់យក status ("unpaid") ពី payment.html
     } = req.body;
 
     const formattedItems = items.map((item) => {
@@ -34,13 +36,13 @@ const createOrder = async (req, res) => {
       orderId,
       totalAmount: Number(totalAmount) || 0,
       items: formattedItems,
-      paymentStatus: "PENDING",
+      paymentStatus: "UNPAID", // 👈 ដូរលំនាំដើមទៅជា UNPAID
       shippingAddress: shippingAddress || "មិនទាន់បញ្ជាក់",
       phone: phone || "មិនទាន់បញ្ជាក់",
-      status: "pending",
+      status: status || "unpaid", // 👈 ប្រើប្រាស់ status ពី frontend ឬលោតចូល unpaid ស្វ័យប្រវត្តិ
       timeline: [
         {
-          status: "pending",
+          status: status || "unpaid",
           note: "ការបញ្ជាទិញត្រូវបានបង្កើត (រង់ចាំការទូទាត់ប្រាក់)",
         },
       ],
@@ -113,12 +115,10 @@ const confirmReceipt = async (req, res) => {
 
     // 🚀 ការពារកុំឱ្យគេវាយ API នេះផ្ទួនៗរួចលុយបូក ២ ដង
     if (order.status === "completed") {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "ការបញ្ជាទិញនេះបានបញ្ជាក់រួចរាល់ហើយ!",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "ការបញ្ជាទិញនេះបានបញ្ជាក់រួចរាល់ហើយ!",
+      });
     }
 
     // 🚀 បែងចែកលុយ (Commission -> Admin & Earning -> Seller)
@@ -172,12 +172,10 @@ const updateOrderStatus = async (req, res) => {
 
     // ការពារកុំឱ្យបូកលុយជាន់គ្នា បើ Order នោះ Completed ស្រាប់
     if (order.status === "completed") {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "ការបញ្ជាទិញបានបញ្ចប់រួចរាល់ហើយ មិនអាចប្ដូរបានទេ!",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "ការបញ្ជាទិញបានបញ្ចប់រួចរាល់ហើយ មិនអាចប្ដូរបានទេ!",
+      });
     }
 
     // 🚀 បើ Status ថ្មីជា "completed" ទើបធ្វើការបែងចែកលុយ

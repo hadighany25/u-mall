@@ -1,25 +1,26 @@
 <!doctype html>
-<html lang="km" class="bg-gray-50">
+<html lang="en" class="bg-gray-50">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>កន្ត្រកទំនិញ - U-Mall</title>
+    <title>Shopping Cart - U-Mall</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <style>
       body {
-        font-family: "Kantumruy Pro", sans-serif;
+        font-family: "Outfit", sans-serif;
       }
     </style>
   </head>
   <body class="text-gray-800 antialiased flex flex-col min-h-screen">
+    <!-- Header -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
       <div
         class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between"
@@ -29,14 +30,15 @@
           class="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors"
         >
           <i class="fas fa-arrow-left text-lg"></i>
-          <span class="font-bold">បន្តការទិញទំនិញ</span>
+          <span class="font-bold">Continue Shopping</span>
         </a>
-        <div class="text-lg font-bold text-gray-700">កន្ត្រករបស់អ្នក</div>
-        <div class="w-24"></div>
+        <div class="text-lg font-bold text-gray-700">Your Cart</div>
+        <div class="w-32"></div>
       </div>
     </header>
 
     <main class="flex-grow max-w-4xl mx-auto px-4 py-8 w-full">
+      <!-- Empty Cart State -->
       <div
         id="empty-cart"
         class="hidden flex flex-col items-center justify-center py-20 text-center"
@@ -46,53 +48,50 @@
         >
           <i class="fas fa-shopping-cart text-4xl text-gray-300"></i>
         </div>
-        <h2 class="text-xl font-bold text-gray-800 mb-2">
-          កន្ត្រករបស់អ្នកទទេស្អាត
-        </h2>
+        <h2 class="text-xl font-bold text-gray-800 mb-2">Your cart is empty</h2>
         <p class="text-gray-500 mb-6">
-          សូមស្វែងរកផលិតផលដែលអ្នកពេញចិត្ត រួចបញ្ចូលមកទីនេះ។
+          Browse our products and add your favorites here.
         </p>
         <a
           href="index.html"
           class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-all"
         >
-          ទៅទិញទំនិញ
+          Go Shopping
         </a>
       </div>
 
+      <!-- Cart Content -->
       <div
         id="cart-content"
         class="grid grid-cols-1 md:grid-cols-3 gap-8 hidden"
       >
-        <!-- បញ្ជីទំនិញ -->
+        <!-- Cart Items List -->
         <div class="md:col-span-2 space-y-4">
-          <h2 class="text-xl font-bold text-gray-800 mb-4">
-            ទំនិញដែលបានជ្រើសរើស
-          </h2>
+          <h2 class="text-xl font-bold text-gray-800 mb-4">Selected Items</h2>
           <div id="cart-items" class="space-y-3">
-            <!-- JavaScript នឹងគូរទំនិញនៅទីនេះ -->
+            <!-- JavaScript will render items here -->
           </div>
         </div>
 
-        <!-- វិក័យប័ត្រសរុប -->
+        <!-- Order Summary -->
         <div
           class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit"
         >
           <h2
             class="text-xl font-bold text-gray-800 mb-4 pb-4 border-b border-gray-100"
           >
-            សរុបទឹកប្រាក់
+            Order Summary
           </h2>
 
           <div class="space-y-3 mb-6 text-gray-600">
             <div class="flex justify-between">
-              <span>សរុបទំនិញ</span>
+              <span>Subtotal</span>
               <span id="cart-subtotal" class="font-medium text-gray-800"
                 >$0.00</span
               >
             </div>
             <div class="flex justify-between">
-              <span>សេវាដឹកជញ្ជូន</span>
+              <span>Shipping Fee</span>
               <span class="font-medium text-gray-800">$1.50</span>
             </div>
           </div>
@@ -100,7 +99,7 @@
           <div
             class="border-t border-gray-100 pt-4 mb-6 flex justify-between items-end"
           >
-            <span class="text-lg font-bold text-gray-800">សរុប</span>
+            <span class="text-lg font-bold text-gray-800">Total</span>
             <span id="cart-total" class="text-2xl font-bold text-blue-600"
               >$0.00</span
             >
@@ -110,20 +109,48 @@
             href="payment.html"
             class="w-full block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all"
           >
-            បន្តទៅទូទាត់ប្រាក់ <i class="fas fa-arrow-right ml-1"></i>
+            Proceed to Checkout <i class="fas fa-arrow-right ml-1"></i>
           </a>
         </div>
       </div>
     </main>
 
     <script>
+      const API_GET_PRODUCTS = "/api/public/products";
       let cartItems = [];
 
-      document.addEventListener("DOMContentLoaded", () => {
+      document.addEventListener("DOMContentLoaded", async () => {
         const savedCart = localStorage.getItem("umall_cart");
         if (savedCart) {
           cartItems = JSON.parse(savedCart);
         }
+
+        // 🌟 Fetch Real Products from DB to get the Images
+        try {
+          const prodRes = await fetch(API_GET_PRODUCTS);
+          const prodData = await prodRes.json();
+
+          if (prodData.success && prodData.products) {
+            cartItems = cartItems.map((item) => {
+              const realProduct = prodData.products.find(
+                (p) => p._id === item.id || p._id === item.productId,
+              );
+              if (realProduct) {
+                return {
+                  ...item,
+                  image: realProduct.imageUrl || item.image || item.imageUrl,
+                  price: realProduct.price, // Update to latest price just in case
+                };
+              }
+              return item;
+            });
+            // Update local storage with fetched images
+            localStorage.setItem("umall_cart", JSON.stringify(cartItems));
+          }
+        } catch (e) {
+          console.error("Failed to fetch products for images", e);
+        }
+
         renderCart();
       });
 
@@ -163,11 +190,12 @@
 
         itemsContainer.innerHTML = cartItems
           .map((item, index) => {
-            subTotal += item.price * item.qty;
-            const imgHtml = item.image
-              ? `<img src="${item.image}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" class="w-20 h-20 rounded-xl object-cover border border-gray-100 shadow-sm flex-shrink-0" />
-                 <div class="w-20 h-20 rounded-xl bg-gray-100 border border-gray-100 flex items-center justify-center hidden"><i class="fas fa-image text-gray-300 text-xl"></i></div>`
-              : `<div class="w-20 h-20 rounded-xl bg-gray-100 border border-gray-100 flex items-center justify-center flex-shrink-0"><i class="fas fa-image text-gray-300 text-xl"></i></div>`;
+            const itemQty = item.qty || item.quantity || 1;
+            subTotal += item.price * itemQty;
+
+            const imgSrc =
+              item.image || "https://via.placeholder.com/80?text=No+Image";
+            const imgHtml = `<img src="${imgSrc}" onerror="this.src='https://via.placeholder.com/80?text=No+Image';" class="w-20 h-20 rounded-xl object-cover border border-gray-100 shadow-sm flex-shrink-0" />`;
 
             return `
           <div class="flex items-center justify-between p-4 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
@@ -182,7 +210,7 @@
             <div class="flex items-center space-x-3 ml-4">
                 <div class="flex items-center bg-gray-50 border border-gray-200 rounded-lg p-1">
                   <button onclick="updateQty(${index}, -1)" class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-white hover:shadow-sm text-gray-600 transition-all">-</button>
-                  <span class="text-sm font-bold w-6 text-center text-gray-800">${item.qty}</span>
+                  <span class="text-sm font-bold w-6 text-center text-gray-800">${itemQty}</span>
                   <button onclick="updateQty(${index}, 1)" class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-white hover:shadow-sm text-gray-600 transition-all">+</button>
                 </div>
                 <button onclick="removeItem(${index})" class="w-10 h-10 rounded-lg flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors">

@@ -1,41 +1,47 @@
+// controllers/sellerController.js
 const User = require("../models/User");
 const Store = require("../models/Store");
 const bcrypt = require("bcryptjs");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 
+// 🌟 មុខងារជំនួយសម្រាប់ស្វែងរកហាង ដោយផ្អែកលើអ្នកដែលកំពុងស្នើសុំ (Admin ឬ Seller)
+const getStoreQuery = (req) => {
+  if (req.user.role === "admin" || req.user.role === "super_admin") {
+    if (!req.query.storeId && !req.body.storeId) {
+      throw new Error("ត្រូវបញ្ជាក់ storeId សម្រាប់ Admin");
+    }
+    return { _id: req.query.storeId || req.body.storeId };
+  } else {
+    return { owner: req.user.id || req.user._id };
+  }
+};
+
 // ==========================================
 // PROFILE & SETTINGS
 // ==========================================
 exports.getProfile = async (req, res) => {
   try {
-    // ធានាថាទាញយក ID បានត្រឹមត្រូវទោះ Middleware បោះមកជា id ឬ _id
-    const userId = req.user.id || req.user._id;
-    console.log("🔍 កំពុងស្វែងរកហាងសម្រាប់ User ID:", userId);
-
-    const store = await Store.findOne({ owner: userId });
+    const storeQuery = getStoreQuery(req);
+    const store = await Store.findOne(storeQuery);
 
     if (!store) {
-      console.log("❌ រកមិនឃើញហាងសម្រាប់ User ID:", userId);
-      return res.status(404).json({
-        success: false,
-        message: "រកមិនឃើញហាងទេ! សូមទាក់ទង Admin ដើម្បីបង្កើតហាងឱ្យអ្នក។",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "រកមិនឃើញហាងទេ!" });
     }
-
-    console.log("✅ រកឃើញហាង:", store.storeName);
     res.json({ success: true, store });
   } catch (error) {
-    console.error("Error fetching profile:", error);
+    const status = error.message.includes("ត្រូវបញ្ជាក់ storeId") ? 400 : 500;
     res
-      .status(500)
-      .json({ success: false, message: "មានបញ្ហាបច្ចេកទេសលើ Server" });
+      .status(status)
+      .json({ success: false, message: error.message || "មានបញ្ហាបច្ចេកទេស" });
   }
 };
 
 exports.updateProfile = async (req, res) => {
   try {
-    const userId = req.user.id || req.user._id;
+    const storeQuery = getStoreQuery(req);
     const {
       storeName,
       logoUrl,
@@ -46,11 +52,12 @@ exports.updateProfile = async (req, res) => {
     } = req.body;
 
     const store = await Store.findOneAndUpdate(
-      { owner: userId },
+      storeQuery,
       { storeName, logoUrl, coverUrl, description, paymentInfo, categories },
       { new: true },
     );
-
+    if (!store)
+      return res.status(404).json({ success: false, message: "រកមិនឃើញហាង!" });
     res.json({ success: true, store, message: "បានកែប្រែដោយជោគជ័យ" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -71,7 +78,6 @@ exports.changePassword = async (req, res) => {
 
     user.password = await bcrypt.hash(newPass, 10);
     await user.save();
-
     res.json({ success: true, message: "ប្ដូរលេខសម្ងាត់ជោគជ័យ!" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -83,9 +89,8 @@ exports.changePassword = async (req, res) => {
 // ==========================================
 exports.getProducts = async (req, res) => {
   try {
-    const userId = req.user.id || req.user._id;
-    const store = await Store.findOne({ owner: userId });
-
+    const storeQuery = getStoreQuery(req);
+    const store = await Store.findOne(storeQuery);
     if (!store) return res.json({ success: true, products: [] });
 
     const products = await Product.find({ store: store._id });
@@ -97,9 +102,12 @@ exports.getProducts = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    const userId = req.user.id || req.user._id;
+    const storeQuery = getStoreQuery(req);
     const { name, price, stock, imageUrl, category } = req.body;
-    const store = await Store.findOne({ owner: userId });
+    const store = await Store.findOne(storeQuery);
+
+    if (!store)
+      return res.status(404).json({ success: false, message: "រកមិនឃើញហាង!" });
 
     const product = new Product({
       name,
@@ -110,25 +118,20 @@ exports.createProduct = async (req, res) => {
       store: store._id,
     });
     await product.save();
-
     res.status(201).json({ success: true, product });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// បន្ថែមនៅពីលើ exports.deleteProduct
 exports.updateProduct = async (req, res) => {
   try {
     const { name, price, stock, imageUrl, category } = req.body;
-
-    // ស្វែងរកទំនិញតាម ID រួច Update ទិន្នន័យថ្មី
     const product = await Product.findByIdAndUpdate(
       req.params.id,
       { name, price, stock, imageUrl, category },
-      { new: true }, // ឱ្យវា Return យកទិន្នន័យថ្មីដែលទើបកែរួច
+      { new: true },
     );
-
     res.json({ success: true, product, message: "បានកែប្រែដោយជោគជ័យ" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -149,14 +152,13 @@ exports.deleteProduct = async (req, res) => {
 // ==========================================
 exports.getOrders = async (req, res) => {
   try {
-    const userId = req.user.id || req.user._id;
-    const store = await Store.findOne({ owner: userId });
-
+    const storeQuery = getStoreQuery(req);
+    const store = await Store.findOne(storeQuery);
     if (!store) return res.json({ success: true, orders: [] });
 
-    const orders = await Order.find({ store: store._id }).sort({
-      createdAt: -1,
-    });
+    const orders = await Order.find({ store: store._id })
+      .populate("buyer", "username phone fullName")
+      .sort({ createdAt: -1 });
     res.json({ success: true, orders });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -177,38 +179,28 @@ exports.updateOrderStatus = async (req, res) => {
   }
 };
 
-// បន្ថែមពីក្រោម exports.updateOrderStatus
 exports.cancelOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const { reason } = req.body;
-
-    if (!reason) {
+    if (!reason)
       return res
         .status(400)
-        .json({ success: false, message: "សូមបញ្ជាក់មូលហេតុនៃការបោះបង់!" });
-    }
+        .json({ success: false, message: "សូមបញ្ជាក់មូលហេតុ!" });
 
     const order = await Order.findById(id);
-    if (!order) {
+    if (!order)
       return res
         .status(404)
-        .json({ success: false, message: "រកមិនឃើញ Order នេះទេ" });
-    }
-
-    if (order.status === "cancelled") {
-      return res
-        .status(400)
-        .json({ success: false, message: "Order នេះត្រូវបានបោះបង់រួចហើយ" });
-    }
+        .json({ success: false, message: "រកមិនឃើញ Order ទេ" });
+    if (order.status === "cancelled")
+      return res.status(400).json({ success: false, message: "បោះបង់រួចហើយ" });
 
     order.status = "cancelled";
-    order.cancelReason = reason; // រក្សាទុកមូលហេតុចូល Database
+    order.cancelReason = reason;
     await order.save();
-
     res.json({ success: true, message: "បោះបង់ជោគជ័យ", order });
   } catch (error) {
-    console.error("Error Cancel Order:", error);
     res
       .status(500)
       .json({ success: false, message: "មានបញ្ហាបច្ចេកទេសលើ Server" });

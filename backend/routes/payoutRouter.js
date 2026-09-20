@@ -1,3 +1,4 @@
+//payoutRouter.js
 const express = require("express");
 const router = express.Router();
 const payoutController = require("../controllers/payoutController");
@@ -37,6 +38,14 @@ router.get(
   verifyToken,
   isAdmin,
   payoutController.getAllWithdrawals,
+);
+
+// 🌟 បន្ថែម Route ថ្មី៖ សម្រាប់ Admin ទាញយកទិន្នន័យសំណើដកប្រាក់មួយជាក់លាក់ (Review)
+router.get(
+  "/admin/withdrawals/:id",
+  verifyToken,
+  isAdmin,
+  payoutController.getWithdrawalById,
 );
 
 // ផ្លូវសម្រាប់ Approve និង Reject (មានស្រាប់)

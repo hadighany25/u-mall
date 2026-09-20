@@ -1,6 +1,6 @@
 // ទីតាំង៖ models/Order.js
 const mongoose = require("mongoose");
-const User = require("./User"); // 👈 កែត្រង់នេះ៖ លុបអក្សរ s ចេញ (ឱ្យដូចឈ្មោះ File ពិតប្រាកដ)
+const User = require("./User");
 
 const orderSchema = new mongoose.Schema(
   {
@@ -50,14 +50,22 @@ const orderSchema = new mongoose.Schema(
     // ==========================================
     // ៤. ផ្នែកគ្រប់គ្រងការដឹកជញ្ជូន
     // ==========================================
-    // កូដមួយផ្នែកនៅក្នុង Order Schema
     status: {
       type: String,
-      enum: ["pending", "processing", "shipped", "completed", "cancelled"],
-      default: "pending",
+      // 🌟 បន្ថែម "unpaid" ជាជម្រើសមួយ
+      enum: [
+        "unpaid",
+        "pending",
+        "processing",
+        "shipped",
+        "completed",
+        "cancelled",
+      ],
+      // 🌟 កំណត់ "unpaid" ជាលំនាំដើមពេលទើបចុច Checkout
+      default: "unpaid",
     },
     cancelReason: {
-      type: String, // សម្រាប់រក្សាទុកមូលហេតុដែលលុប
+      type: String,
       default: null,
     },
     timeline: [
@@ -72,10 +80,9 @@ const orderSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// 🌟 Mongoose Pre-save Hook (លុប next() ចេញព្រោះប្រើ async) 🌟
+// 🌟 Mongoose Pre-save Hook 🌟
 orderSchema.pre("save", async function () {
   try {
-    // ឆែកមើលថាមាន buyer ហើយវាជា ObjectId ត្រឹមត្រូវ
     if (
       this.buyer &&
       mongoose.Types.ObjectId.isValid(this.buyer) &&
@@ -94,10 +101,8 @@ orderSchema.pre("save", async function () {
         }
       }
     }
-    // Mongoose ជំនាន់ថ្មី ប្រើ async មិនបាច់ហៅ next() ទេ វាដើរទៅមុខដោយស្វ័យប្រវត្តិពេលចប់កូដ
   } catch (error) {
     console.error("⚠️ Hook Error (Ignored):", error.message);
-    // បើមាន Error ក៏វាមិនគាំងដែរ វាគ្រាន់តែមិនបានទាញទិន្នន័យ User មកបញ្ចួល
   }
 });
 

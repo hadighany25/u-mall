@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="km" class="bg-gray-50">
+<html lang="en" class="bg-gray-50">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Payment - U-Mall</title>
+    <title>Checkout Payment - U-Mall</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link
@@ -11,20 +11,28 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <style>
       body {
-        font-family: "Kantumruy Pro", sans-serif;
+        font-family: "Outfit", sans-serif;
       }
       .no-scrollbar::-webkit-scrollbar {
         display: none;
       }
+      /* Apply English Font to SweetAlert */
+      .swal2-popup,
+      .swal2-title,
+      .swal2-html-container,
+      .swal2-confirm,
+      .swal2-cancel {
+        font-family: "Outfit", sans-serif !important;
+      }
     </style>
   </head>
   <body class="text-gray-800 antialiased flex flex-col min-h-screen">
-    <!-- ================= ផ្នែក HEADER ================= -->
+    <!-- ================= HEADER ================= -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
       <div
         class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between"
@@ -34,22 +42,22 @@
           class="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors"
         >
           <i class="fas fa-arrow-left text-lg"></i>
-          <span class="font-bold">ត្រលប់ក្រោយ</span>
+          <span class="font-bold">Go Back</span>
         </a>
-        <div class="text-lg font-bold text-gray-700">ការទូទាត់ប្រាក់</div>
+        <div class="text-lg font-bold text-gray-700">Checkout Payment</div>
         <div class="w-20"></div>
       </div>
     </header>
 
     <main class="flex-grow max-w-5xl mx-auto px-4 py-8 w-full">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- ================= ផ្នែកខាងឆ្វេង៖ ជម្រើសទូទាត់ ================= -->
+        <!-- ================= LEFT: PAYMENT METHODS ================= -->
         <div
           class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit"
         >
           <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
             <i class="fas fa-wallet text-blue-600 mr-3"></i>
-            ជ្រើសរើសវិធីសាស្ត្រទូទាត់
+            Select Payment Method
           </h2>
 
           <div class="flex space-x-2 mb-6 bg-gray-100 p-1 rounded-xl">
@@ -65,11 +73,11 @@
               onclick="switchTab('card')"
               class="flex-1 py-2.5 rounded-lg font-medium text-sm transition-all text-gray-500 hover:text-gray-700"
             >
-              <i class="fas fa-credit-card mr-2"></i> បង់តាមកាត
+              <i class="fas fa-credit-card mr-2"></i> Credit Card
             </button>
           </div>
 
-          <!-- ផ្នែក U-Pay QR -->
+          <!-- U-Pay QR Section -->
           <div id="qr-section" class="text-center">
             <div
               class="inline-block p-4 border-2 border-dashed border-blue-200 rounded-2xl bg-blue-50 mb-4 relative min-h-[200px] flex items-center justify-center w-full max-w-[250px] mx-auto"
@@ -90,13 +98,13 @@
                 <span
                   class="text-xs text-blue-600 font-bold"
                   id="qr-instruction-small"
-                  >កំពុងរៀបចំ...</span
+                  >Preparing...</span
                 >
               </div>
             </div>
 
             <p class="text-sm text-gray-500 mb-6" id="qr-instruction">
-              កំពុងរៀបចំវិក័យប័ត្រ...
+              Generating Invoice...
             </p>
 
             <button
@@ -104,17 +112,17 @@
               onclick="openUPayBank()"
               class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 pointer-events-none opacity-50"
             >
-              <i class="fas fa-external-link-alt text-lg"></i> បន្តទៅបង់ប្រាក់លើ
-              U-Pay
+              <i class="fas fa-external-link-alt text-lg"></i> Proceed to U-Pay
+              App
             </button>
           </div>
 
-          <!-- ផ្នែក បង់តាមកាត -->
+          <!-- Credit Card Section -->
           <div id="card-section" class="hidden">
             <div class="space-y-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1"
-                  >លេខកាត (Card Number)</label
+                  >Card Number</label
                 >
                 <input
                   type="text"
@@ -127,7 +135,7 @@
               <div class="flex gap-4">
                 <div class="flex-1">
                   <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >ថ្ងៃផុតកំណត់</label
+                    >Expiry Date</label
                   >
                   <input
                     type="text"
@@ -139,7 +147,7 @@
                 </div>
                 <div class="flex-1">
                   <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >លេខ CVV</label
+                    >CVV</label
                   >
                   <input
                     type="password"
@@ -154,50 +162,51 @@
                 onclick="submitCardPayment()"
                 class="w-full mt-4 bg-gray-800 hover:bg-black text-white font-bold py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
               >
-                <i class="fas fa-lock text-sm"></i> បញ្ជាក់ការបង់ប្រាក់
+                <i class="fas fa-lock text-sm"></i> Confirm Payment
               </button>
             </div>
           </div>
         </div>
 
-        <!-- ================= ផ្នែកខាងស្ដាំ៖ សង្ខេបការបញ្ជាទិញ ================= -->
+        <!-- ================= RIGHT: ORDER SUMMARY ================= -->
         <div
           class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit flex flex-col"
         >
           <div
             class="flex justify-between items-center mb-4 pb-4 border-b border-gray-100"
           >
-            <h2 class="text-xl font-bold text-gray-800">សង្ខេបការបញ្ជាទិញ</h2>
+            <h2 class="text-xl font-bold text-gray-800">Order Summary</h2>
             <a
               href="cart.html"
               class="text-sm font-medium text-blue-600 hover:underline"
-              ><i class="fas fa-edit mr-1"></i> កែប្រែ</a
             >
+              <i class="fas fa-edit mr-1"></i> Edit
+            </a>
           </div>
 
           <div
             class="text-sm font-normal text-gray-500 mb-3"
             id="display-order-id"
           >
-            កំពុងផ្ទុក...
+            Loading...
           </div>
 
           <div
             id="order-items"
             class="flex-1 overflow-y-auto pr-2 space-y-3 mb-6 no-scrollbar max-h-[40vh]"
           >
-            <!-- JS នឹងគូរទំនិញនៅទីនេះ -->
+            <!-- JS will render items here -->
           </div>
 
           <div class="border-t border-gray-100 pt-4 space-y-2">
             <div class="flex justify-between text-gray-600">
-              <span>សរុបទំនិញ</span><span id="sub-total">$0.00</span>
+              <span>Subtotal</span><span id="sub-total">$0.00</span>
             </div>
             <div class="flex justify-between text-gray-600">
-              <span>សេវាដឹកជញ្ជូន</span><span id="shipping-fee">$1.50</span>
+              <span>Shipping Fee</span><span id="shipping-fee">$1.50</span>
             </div>
             <div class="flex justify-between items-end pt-2">
-              <span class="text-lg font-bold text-gray-800">ទឹកប្រាក់សរុប</span>
+              <span class="text-lg font-bold text-gray-800">Total Amount</span>
               <span id="total-amount" class="text-2xl font-bold text-blue-600"
                 >$0.00</span
               >
@@ -207,12 +216,12 @@
       </div>
     </main>
 
-    <!-- ================= ផ្នែក JAVASCRIPT LOGIC ================= -->
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
     <script>
       const API_ORDER_CREATE = "/api/orders/create";
       const API_UPAY_QR = "/api/payment/create-qr";
       const API_ORDER_STATUS = "/api/payment/orders/status";
-      const API_GET_PRODUCTS = "/api/products";
+      const API_GET_PRODUCTS = "/api/public/products"; // Corrected to match public product route
 
       let currentOrderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
       let currentTotal = 0;
@@ -221,10 +230,10 @@
       let pollingInterval;
 
       let currentBuyerId = null;
-      let currentPhone = "មិនទាន់បញ្ជាក់";
-      let currentAddress = "មិនទាន់បញ្ជាក់";
+      let currentPhone = "Not Set";
+      let currentAddress = "Not Set";
 
-      // 🌟 Function សំខាន់បំផុត៖ ជួយចម្រាញ់យកតែ ID សុទ្ធសាធ ការពារកុំឱ្យជាប់ជា [object Object] ធ្វើឱ្យ DB គាំង
+      // Extracts valid ID to prevent [object Object] errors in Database
       function extractId(data) {
         if (!data) return null;
         if (typeof data === "string") return data;
@@ -232,9 +241,6 @@
         return null;
       }
 
-      // ----------------------------------------------------
-      // ១. ចាប់ផ្ដើមទំព័រ (Init & Fetch Data)
-      // ----------------------------------------------------
       document.addEventListener("DOMContentLoaded", async () => {
         const token = localStorage.getItem("token");
         if (token) {
@@ -252,7 +258,7 @@
             );
             currentBuyerId = JSON.parse(jsonPayload).id;
           } catch (e) {
-            console.error("កំហុសអាន Token");
+            console.error("Token Decode Error");
           }
         }
 
@@ -275,9 +281,9 @@
 
         cartItems = JSON.parse(savedCart);
         document.getElementById("display-order-id").innerText =
-          "លេខវិក័យប័ត្រ: " + currentOrderId;
+          "Order ID: " + currentOrderId;
 
-        // ទាញយករូបភាព និងតម្លៃពិតប្រាកដពី Database
+        // Fetch real images and prices from DB
         try {
           const prodRes = await fetch(API_GET_PRODUCTS);
           const prodData = await prodRes.json();
@@ -296,7 +302,6 @@
                     item.image ||
                     item.imageUrl,
                   price: realProduct.price,
-                  // 🌟 ប្រើប្រាស់មុខងារ extractId ដើម្បីធានាថាវាចេញជា String ប្រាកដមែន
                   storeId: extractId(
                     realProduct.store || item.storeId || item.store,
                   ),
@@ -309,13 +314,13 @@
             });
           }
         } catch (e) {
-          console.error("មិនអាចភ្ជាប់ទៅ Database ដើម្បីទាញរូបភាពបានទេ", e);
+          console.error("Database connection failed for images", e);
         }
 
         renderOrderList();
         startPaymentProcess();
 
-        // លម្អិតការវាយបញ្ចូលលេខកាត
+        // Card Formatting Logic
         const cardNum = document.getElementById("card-num");
         cardNum.addEventListener("input", function (e) {
           let val = e.target.value.replace(/[^\d]/g, "");
@@ -323,9 +328,6 @@
         });
       });
 
-      // ----------------------------------------------------
-      // ២. បង្ហាញបញ្ជីទំនិញ
-      // ----------------------------------------------------
       function renderOrderList() {
         const itemsContainer = document.getElementById("order-items");
         let subTotal = 0;
@@ -343,7 +345,7 @@
                     <img src="${imgSrc}" onerror="this.src='https://via.placeholder.com/80';" class="w-12 h-12 rounded-lg object-cover border border-gray-200" />
                     <div class="flex-1 min-w-0">
                         <div class="font-bold text-gray-800 text-sm truncate">${item.name}</div>
-                        <div class="text-xs text-gray-500 mt-0.5">ចំនួន: ${itemQty}</div>
+                        <div class="text-xs text-gray-500 mt-0.5">Qty: ${itemQty}</div>
                     </div>
                 </div>
                 <div class="font-bold text-blue-600 text-sm pl-2">$${(item.price * itemQty).toFixed(2)}</div>
@@ -358,17 +360,13 @@
           "$" + currentTotal.toFixed(2);
       }
 
-      // ----------------------------------------------------
-      // ៣. ដំណើរការបែងចែកហាង & បង្កើត QR (Core Logic)
-      // ----------------------------------------------------
       async function startPaymentProcess() {
         try {
           document.getElementById("qr-instruction").innerText =
-            "កំពុងរៀបចំវិក័យប័ត្រ...";
+            "Generating Invoice...";
 
           const ordersByStore = {};
           cartItems.forEach((item) => {
-            // 🌟 ត្រូវប្រាកដថា storeId ជា String ពិតប្រាកដ ទើបចែកប្រឡោះត្រូវ
             const storeId =
               extractId(item.storeId || item.store) || "unknown_store";
             if (!ordersByStore[storeId]) ordersByStore[storeId] = [];
@@ -377,7 +375,7 @@
 
           const totalStoresCount = Object.keys(ordersByStore).length;
 
-          // ធ្វើការ Save វិក័យប័ត្រនីមួយៗចូល Database
+          // Save separate orders to database
           const orderPromises = Object.keys(ordersByStore).map(
             (storeId, index) => {
               const storeItems = ordersByStore[storeId];
@@ -385,25 +383,24 @@
                 (sum, i) => sum + i.price * (i.qty || i.quantity || 1),
                 0,
               );
-
               const uniqueOrderId =
                 totalStoresCount > 1
                   ? `${currentOrderId}-${index + 1}`
                   : currentOrderId;
 
-              // 🌟 កែតម្រូវ៖ បញ្ជូនទាំង Key ចាស់និងថ្មី ដើម្បីផ្គាប់ចិត្តទាំង Controller ចាស់ និង Model ថ្មី
               const orderPayload = {
                 orderId: uniqueOrderId,
                 totalAmount: storeSubTotal,
+                status: "unpaid",
                 items: storeItems.map((i) => {
                   const pId = extractId(i.productId || i.id || i.product);
                   return {
-                    product: pId, // សម្រាប់ Schema ថ្មី
-                    productId: pId, // សម្រាប់ការពារក្រែង Controller ចាស់ត្រូវការ
-                    name: i.name || "ទំនិញគ្មានឈ្មោះ",
+                    product: pId,
+                    productId: pId,
+                    name: i.name || "Unknown Product",
                     price: Number(i.price) || 0,
-                    quantity: Number(i.qty || i.quantity || 1), // សម្រាប់ Schema ថ្មី
-                    qty: Number(i.qty || i.quantity || 1), // សម្រាប់ការពារក្រែង Controller ចាស់ត្រូវការ
+                    quantity: Number(i.qty || i.quantity || 1),
+                    qty: Number(i.qty || i.quantity || 1),
                     image: i.image || "https://via.placeholder.com/80",
                     variant: i.variant || "",
                   };
@@ -422,7 +419,7 @@
                 if (!res.ok) {
                   const err = await res.json();
                   throw new Error(
-                    err.message || "មិនអាចកត់ត្រាវិក័យប័ត្រចូល Database បានទេ",
+                    err.message || "Failed to save order to Database.",
                   );
                 }
                 return res.json();
@@ -433,7 +430,7 @@
           await Promise.all(orderPromises);
 
           document.getElementById("qr-instruction").innerText =
-            "កំពុងសុំ QR ពីធនាគារ...";
+            "Requesting QR from U-Pay...";
 
           const qrResponse = await fetch(API_UPAY_QR, {
             method: "POST",
@@ -448,7 +445,7 @@
           if (qrData.success) {
             document.getElementById("qr-loading").classList.add("hidden");
             document.getElementById("qr-instruction").innerHTML =
-              `ស្កេន QR ខាងលើដើម្បីទូទាត់`;
+              `Scan QR Code to Pay`;
 
             uPayWebLink = qrData.deepLink || qrData.qrData;
             const qrImg = document.getElementById("qr-img");
@@ -460,20 +457,17 @@
               .classList.remove("pointer-events-none", "opacity-50");
             startPolling();
           } else {
-            throw new Error(qrData.message || "មិនអាចបង្កើត QR បានទេ");
+            throw new Error(qrData.message || "Failed to generate QR");
           }
         } catch (error) {
-          console.error("កំហុស:", error);
+          console.error("Error:", error);
           document.getElementById("qr-loading").classList.add("hidden");
           document.getElementById("qr-instruction").innerHTML =
-            `<span class='text-red-500 font-bold text-sm'>កំហុស: ${error.message}</span>`;
-          Swal.fire("បរាជ័យក្នុងការទូទាត់", error.message, "error");
+            `<span class='text-red-500 font-bold text-sm'>Error: ${error.message}</span>`;
+          Swal.fire("Payment Failed", error.message, "error");
         }
       }
 
-      // ----------------------------------------------------
-      // ៤. មុខងារ Polling និង មុខងារបន្ទាប់បន្សំ
-      // ----------------------------------------------------
       function startPolling() {
         if (pollingInterval) clearInterval(pollingInterval);
         pollingInterval = setInterval(async () => {
@@ -482,30 +476,29 @@
             const data = await res.json();
 
             if (data.success) {
-              // ករណីភ្ញៀវចុច "យល់ព្រម"
               if (data.status === "PAID" || data.status === "SUCCESS") {
                 clearInterval(pollingInterval);
                 Swal.fire({
                   icon: "success",
-                  title: "ជោគជ័យ!",
-                  text: "ទទួលបានការទូទាត់",
+                  title: "Success!",
+                  text: "Payment Received",
                   timer: 2000,
                   showConfirmButton: false,
                 }).then(() => {
                   localStorage.setItem("umall_cart", "[]");
                   window.location.href = "my-orders.html";
                 });
-              }
-              // 🔴 ថែមករណីថ្មី: ភ្ញៀវចុច "បដិសេធ" វានឹងឈប់វិល ហើយលោតផ្ទាំង Error
-              else if (data.status === "FAILED" || data.status === "REJECTED") {
+              } else if (
+                data.status === "FAILED" ||
+                data.status === "REJECTED"
+              ) {
                 clearInterval(pollingInterval);
                 Swal.fire({
                   icon: "error",
-                  title: "ប្រតិបត្តិការបរាជ័យ",
-                  text: "អតិថិជនបានបដិសេធការទូទាត់ប្រាក់នេះ!",
+                  title: "Transaction Failed",
+                  text: "The payment was rejected!",
                   confirmButtonColor: "#ef4444",
                 }).then(() => {
-                  // ពេលចុច OK អោយវា Refresh ដើម្បិត្រឡប់ទៅដើមវិញ
                   window.location.reload();
                 });
               }
@@ -517,6 +510,7 @@
       function openUPayBank() {
         if (uPayWebLink) window.open(uPayWebLink, "_blank");
       }
+
       function switchTab(type) {
         document
           .getElementById("qr-section")
@@ -524,68 +518,34 @@
         document
           .getElementById("card-section")
           .classList.toggle("hidden", type !== "card");
+
+        document.getElementById("tab-qr").className =
+          type === "qr"
+            ? "flex-1 py-2.5 rounded-lg font-medium text-sm transition-all bg-white shadow text-blue-600"
+            : "flex-1 py-2.5 rounded-lg font-medium text-sm transition-all text-gray-500 hover:text-gray-700";
+        document.getElementById("tab-card").className =
+          type === "card"
+            ? "flex-1 py-2.5 rounded-lg font-medium text-sm transition-all bg-white shadow text-blue-600"
+            : "flex-1 py-2.5 rounded-lg font-medium text-sm transition-all text-gray-500 hover:text-gray-700";
       }
 
-      // ==========================================
-      // 💳 មុខងារធ្វើឱ្យ Form បញ្ចូលកាតវៃឆ្លាត (Smart Card Input)
-      // ==========================================
+      // Card Formatting Logic
       document.addEventListener("DOMContentLoaded", () => {
-        const cardNumInput = document.getElementById("card-num");
         const cardExpiryInput = document.getElementById("card-expiry");
         const cardCvvInput = document.getElementById("card-cvv");
 
-        // ១. សម្រាប់ប្រអប់លេខកាត
-        cardNumInput.addEventListener("input", function (e) {
-          // លុបអ្វីៗដែលមិនមែនជាលេខចេញ (ការពារការវាយអក្សរ)
-          let rawValue = this.value.replace(/\D/g, "");
-
-          // កំណត់ឱ្យវាយបានតែ ១៦ ខ្ទង់ប៉ុណ្ណោះ
-          if (rawValue.length > 16) {
-            rawValue = rawValue.slice(0, 16);
-          }
-
-          // ដកឃ្លាស្វ័យប្រវត្តិរៀងរាល់ ៤ ខ្ទង់ (ឧ. 1234 5678 9012 3456)
-          let formattedValue = rawValue.replace(/(\d{4})(?=\d)/g, "$1 ");
-          this.value = formattedValue;
-
-          // ពេលវាយគ្រប់ ១៦ខ្ទង់ លោតទៅប្រអប់ ថ្ងៃផុតកំណត់ ស្វ័យប្រវត្តិ
-          if (rawValue.length === 16) {
-            cardExpiryInput.focus();
-          }
-        });
-
-        // ២. សម្រាប់ប្រអប់ថ្ងៃផុតកំណត់ (MM/YY)
         cardExpiryInput.addEventListener("input", function (e) {
-          // លុបអ្វីៗដែលមិនមែនជាលេខចេញ
           let rawValue = this.value.replace(/\D/g, "");
-
-          // កំណត់ឱ្យវាយបានតែ ៤ ខ្ទង់ប៉ុណ្ណោះ (ខែ២ ឆ្នាំ២)
-          if (rawValue.length > 4) {
-            rawValue = rawValue.slice(0, 4);
-          }
-
-          // បញ្ចូលសញ្ញា / ស្វ័យប្រវត្តិនៅកណ្តាល
-          if (rawValue.length >= 3) {
+          if (rawValue.length > 4) rawValue = rawValue.slice(0, 4);
+          if (rawValue.length >= 3)
             this.value = rawValue.substring(0, 2) + "/" + rawValue.substring(2);
-          } else {
-            this.value = rawValue;
-          }
-
-          // ពេលវាយគ្រប់ ៤ខ្ទង់ (ឧ. 12/25) លោតទៅប្រអប់ CVV ស្វ័យប្រវត្តិ
-          if (rawValue.length === 4) {
-            cardCvvInput.focus();
-          }
+          else this.value = rawValue;
+          if (rawValue.length === 4) cardCvvInput.focus();
         });
 
-        // ៣. សម្រាប់ប្រអប់ CVV
         cardCvvInput.addEventListener("input", function (e) {
-          // លុបអ្វីៗដែលមិនមែនជាលេខចេញ
           let rawValue = this.value.replace(/\D/g, "");
-
-          // កំណត់ឱ្យវាយបានតែ ៣ ខ្ទង់ប៉ុណ្ណោះ
-          if (rawValue.length > 3) {
-            rawValue = rawValue.slice(0, 3);
-          }
+          if (rawValue.length > 3) rawValue = rawValue.slice(0, 3);
           this.value = rawValue;
         });
       });
@@ -599,13 +559,13 @@
 
         if (!cardNum || !expiry || !cvv)
           return Swal.fire(
-            "បញ្ជាក់",
-            "សូមបញ្ចូលព័ត៌មានកាតអោយបានគ្រប់គ្រាន់!",
+            "Required",
+            "Please fill in all card details!",
             "warning",
           );
 
         Swal.fire({
-          title: "កំពុងភ្ជាប់ទៅកាន់ U-Pay...",
+          title: "Connecting to U-Pay...",
           allowOutsideClick: false,
           didOpen: () => Swal.showLoading(),
         });
@@ -624,19 +584,18 @@
           });
           const data = await res.json();
           if (data.success) {
-            // បង្ហាញ Popup រង់ចាំ និងហៅ Polling អោយឆែកមើល Webhook (ដូច QR ដែរ)
             Swal.fire({
-              title: "សូមពិនិត្យមើល App U-Pay របស់អ្នក",
-              html: "កំពុងរង់ចាំការយល់ព្រមពីម្ចាស់កាត...<br><br><i class='fas fa-spinner fa-spin text-3xl text-blue-600 mt-4'></i>",
+              title: "Check your U-Pay App",
+              html: "Waiting for confirmation...<br><br><i class='fas fa-spinner fa-spin text-3xl text-blue-600 mt-4'></i>",
               showConfirmButton: false,
               allowOutsideClick: false,
             });
             startPolling();
           } else {
-            Swal.fire("បរាជ័យ", data.message, "error");
+            Swal.fire("Failed", data.message, "error");
           }
         } catch (e) {
-          Swal.fire("បរាជ័យ", "មានបញ្ហាបច្ចេកទេសតភ្ជាប់ទៅ Server", "error");
+          Swal.fire("Failed", "Connection error", "error");
         }
       }
     </script>

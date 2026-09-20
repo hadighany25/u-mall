@@ -1,3 +1,4 @@
+// paymentController.js
 const Order = require("../models/Order");
 const crypto = require("crypto");
 const axios = require("axios");
@@ -9,8 +10,7 @@ const createUPayQR = async (req, res) => {
   try {
     const { orderId, amount: frontendAmount } = req.body;
 
-    // 🌟 កែតម្រូវទី១៖ ប្រើ Regex ដើម្បីចាប់យក Order គ្រប់ហាងទាំងអស់ (ORD-123456, ORD-123456-1, -2...)
-    // ការពារកុំឱ្យវាច្រឡំជាមួយ ORD-1234567 ដោយប្រើ (?:-|$)
+    // ប្រើ Regex ដើម្បីចាប់យក Order គ្រប់ហាងទាំងអស់ (ORD-123456, ORD-123456-1, -2...)
     const orderIdRegex = new RegExp("^" + orderId + "(?:-|$)");
 
     const orders = await Order.find({ orderId: orderIdRegex });
@@ -47,10 +47,11 @@ const createUPayQR = async (req, res) => {
       `${baseUrl}/api/merchants/qr/create`,
       {
         merchant_id: merchantId,
-        order_id: orderId, // បញ្ជូនលេខមេទៅកាន់ U-Pay
+        order_id: orderId,
         amount: amount,
         remark: remark,
-        notify_url: "https://fashion-shop-kh.fly.dev/api/payment/webhook",
+        // 🔥 ជួសជុលទី១៖ ប្ដូរលីងទៅជា U-Mall ថ្មី
+        notify_url: "https://u-mall-kh.fly.dev/api/payment/webhook",
         req_time: reqTime,
         sign: hashSignature,
       },
@@ -93,14 +94,12 @@ const processCardPayment = async (req, res) => {
     const timestamp = Date.now().toString();
     const currency = "USD";
 
-    // បង្កើត Hash តាមច្បាប់របស់ U-Pay
     const dataToSign = `${merchantId}${orderId}${amount}${currency}${cardNumber}${timestamp}`;
     const hash = crypto
       .createHmac("sha256", apiSecret)
       .update(dataToSign)
       .digest("hex");
 
-    // បាញ់សំណើទៅកាន់ U-Pay Universal Gateway
     const response = await axios.post(`${baseUrl}/api/gateway/charge-card`, {
       merchantId,
       orderId,
@@ -119,7 +118,6 @@ const processCardPayment = async (req, res) => {
       res.status(400).json({ success: false, message: response.data.message });
     }
   } catch (error) {
-    // 🌟 ការពារ Error 500: ចាប់យក Error ដែល U-Pay បោះត្រឡប់មកវិញអោយបានត្រឹមត្រូវ
     const errorMsg =
       error.response && error.response.data && error.response.data.message
         ? error.response.data.message
@@ -137,14 +135,15 @@ const handleWebhook = async (req, res) => {
   try {
     const { orderId, amount, status, upayTransactionId } = req.body;
 
-    // 🌟 កែតម្រូវទី២៖ ប្រើ Regex UpdateMany ដើម្បីប្រាប់ឱ្យ Database អាប់ដេតគ្រប់ហាងទាំងអស់ដែលនៅក្រោមលេខមេនេះ
     const orderIdRegex = new RegExp("^" + orderId + "(?:-|$)");
 
+    // 🔥 ជួសជុលទី២៖ បន្ថែម status: "pending" ដើម្បីឱ្យ Seller ឃើញ
     const result = await Order.updateMany(
       { orderId: orderIdRegex },
       {
         $set: {
-          paymentStatus: status || "PAID",
+          status: "pending", // 👈 រុញវិក័យប័ត្រចូលប្រអប់ Pending វិញ
+          paymentStatus: status || "PAID", // 👈 បញ្ជាក់ថាលុយបង់រួចរាល់
           upayTransactionId: upayTransactionId,
           paidAt: new Date(),
         },
@@ -175,7 +174,6 @@ const checkOrderStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
 
-    // 🌟 កែតម្រូវទី៣៖ ឆែករកមើលយ៉ាងហោចណាស់ Order ១ ដែលមានលេខមេនេះ ដើម្បីដឹងថា PAID ឬនៅ
     const orderIdRegex = new RegExp("^" + orderId + "(?:-|$)");
     const order = await Order.findOne({ orderId: orderIdRegex });
 
